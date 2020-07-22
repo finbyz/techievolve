@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include techievolve *.css
+recursive-include techievolve *.csv
+recursive-include techievolve *.html
+recursive-include techievolve *.ico
+recursive-include techievolve *.js
+recursive-include techievolve *.json
+recursive-include techievolve *.md
+recursive-include techievolve *.png
+recursive-include techievolve *.py
+recursive-include techievolve *.svg
+recursive-include techievolve *.txt
+recursive-exclude techievolve *.pyc

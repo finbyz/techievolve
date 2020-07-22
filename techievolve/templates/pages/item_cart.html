@@ -1,0 +1,78 @@
+{% set doc = frappe.get_doc('Item',item.name) %}
+
+        <tr>
+        <td width="20%" data-item-code={{item.item_code}}><a href="/{{item.route}}"><img src="{{ item.website_image }}" alt="{{ item.item_name }}"></a></td>
+        <td width="35%">
+            {{ item.item_name }}
+            {{ item.description }}
+            {% if item.product_info.stock_qty[0] %}
+            <br>
+            <span>Available in Stock: {{item.product_info.stock_qty[0]}}</span>
+            {% endif %}
+        </td>
+        <td width="10%" class="rate-{{item.item_code}}" align="right">{{ item.product_info.price.formatted_price}}</td>
+        <td width="10%"><p class="d-none currency-{{item.item_code}}">{{ item.product_info.price.currency_symbol}}</p><span class="case-qty-{{item.item_code}}">{{ doc.weight_per_unit }}</span></td>
+        <td width="15%">
+            <div class="input-group number-spinner">
+                <span class="input-group-prepend d-none d-sm-inline-block">
+                    <button class="btn btn-outline-secondary cart-btn btn-{{item.item_code}}" data-dir="dwn">–</button>
+                </span>
+                <input class="form-control text-right cart-qty-{{ item.item_code}} border-secondary" "
+                                value="0" data-item-code="{{ item.item_code }}">
+                <span class="input-group-append d-none d-sm-inline-block">
+                    <button class="btn btn-outline-secondary cart-btn btn-{{item.item_code}}" data-dir="up">+</button>
+                </span>
+            </div>
+        </td>
+        <td width="20%" class="total-{{item.item_code}}" align="right">$ 0.00</td>
+        </tr>
+{% block script %}
+<script>
+    //frappe.provide("erpnext.shopping_cart");
+    //var shopping_cart = erpnext.shopping_cart;
+    $(".cart-items-custom").on('click', '.number-spinner .btn-{{item.item_code}}', function () {
+            var btn = $(this),
+            input = btn.closest('.number-spinner').find('input'),
+            oldValue = input.val().trim(),
+            newVal = 0;
+
+            if (btn.attr('data-dir') == 'up') {
+                newVal = parseInt(oldValue) + 1;
+            } else {
+                if (oldValue > 1) {
+                    newVal = parseInt(oldValue) - 1;
+                }
+            }
+            input.val(newVal);
+            
+            var item_code = input.attr("data-item-code");
+            cost_calculation(newVal, item_code)
+           // var case_qty = parseFloat(btn.closest('.case-qty-{{item.item_code}}').html());
+            //var rate = parseFloat(btn.closest('.rate-{{item.item_code}}').html().replace(/[^\d\.]/, ''));
+            //var total = (newVal * case_qty * rate).toFixed(2);
+            //var currency = "{{ item.product_info.price.currency_symbol}}"
+            //var formatted_total = currency + total;
+            
+            //btn.closest('.total-{{item.item_code}}').html(formatted_total)
+            return false;
+    });
+    $(".cart-items-custom").on("change", ".cart-qty-{{ item.item_code }}", function () {
+      // cost_calculation($(this).val())
+        var qty = $(this).val();
+        var item_code = $(this).attr("data-item-code");
+
+        cost_calculation(qty,item_code)
+       
+    });
+    function cost_calculation(qty, item_code){
+       // var qty = btn.val();
+        var case_qty = parseFloat($('.case-qty-'+item_code).html());
+        var rate = parseFloat($('.rate-'+item_code).html().replace(/[^\d\.]/, ''));
+        var total = (qty * case_qty * rate).toFixed(2);
+        var currency = $('.currency-'+item_code).html()
+        var formatted_total = currency + total;
+        $('.total-'+item_code).html(formatted_total)
+       
+    }
+</script>
+{% endblock %}
