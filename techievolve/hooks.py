@@ -87,6 +87,13 @@ app_license = "GPL 3.0"
 #	}
 # }
 
+doc_events = {
+	"Item":{
+		"before_validate": "techievolve.techievolve.doc_events.item.before_validate",
+		"on_update": "techievolve.techievolve.doc_events.item.on_update",
+	}
+}
+
 # Scheduled Tasks
 # ---------------
 
