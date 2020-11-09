@@ -1,5 +1,7 @@
 {% for d in doc.items %}
 <tr data-name="{{ d.name }}">
+    <td><a href="/{{d.route}}"><img
+        src="{{ d.website_image or d.image }}" alt="{{ d.name }}"></a></td>
     <td>
         <div class="font-weight-bold">
             {{ d.item_name }}
@@ -18,16 +20,21 @@
                 placeholder="{{ _('Add notes') }}">{{d.additional_notes or ''}}</textarea>
         </div>
     </td>
+    <td class="text-right"> {{ frappe.db.get_value('Item',d.item_code,'case_qty') }} </td>
     <td class="text-right">
         <div class="input-group number-spinner">
             <span class="input-group-prepend d-none d-sm-inline-block">
                 <button class="btn btn-outline-secondary cart-btn" data-dir="dwn">–</button>
             </span>
-            <input class="form-control text-right cart-qty border-secondary" value="{{ d.get_formatted('qty') }}"
+            <input class="form-control text-right cart-qty border-secondary" name="value" value="{{ d.get_formatted('qty') }}"
                 data-item-code="{{ d.item_code }}">
             <span class="input-group-append d-none d-sm-inline-block">
                 <button class="btn btn-outline-secondary cart-btn" data-dir="up">+</button>
             </span>
+        </div>
+        <!-- button -->
+        <div>
+            <button class="btn-remove"  data-item-code={{ d.item_code }} data-dir="remove" >X</button>
         </div>
     </td>
     {% if cart_settings.enable_checkout %}
@@ -42,3 +49,9 @@
     {% endif %}
 </tr>
 {% endfor %}
+<script>
+     $(".cart-items .btn-remove").on('click', function () {
+        item_code = $(this).attr("data-item-code");
+        shopping_cart.shopping_cart_update({item_code, qty: 0});
+    })
+</script>

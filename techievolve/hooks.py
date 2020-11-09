@@ -17,7 +17,7 @@ app_license = "GPL 3.0"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/techievolve/css/techievolve.css"
 # app_include_js = "/assets/techievolve/js/techievolve.js"
-
+app_include_html = "/assets/techievolve/js/techievolve.js"
 # include js, css files in header of web template
 # web_include_css = "/assets/techievolve/css/techievolve.css"
 # web_include_js = "/assets/techievolve/js/techievolve.js"
@@ -86,11 +86,20 @@ app_license = "GPL 3.0"
 # 		"on_trash": "method"
 #	}
 # }
-
+app_include_css = ["assets/css/techievolve.css"]
+doctype_js = {
+	"Supplier":"public/js/supplier.js"
+}
 doc_events = {
 	"Item":{
 		"before_validate": "techievolve.techievolve.doc_events.item.before_validate",
 		"on_update": "techievolve.techievolve.doc_events.item.on_update",
+	},
+	"Material Request":{
+		"before_validate": "techievolve.techievolve.doc_events.material_request.before_validate"
+	},
+	"Quotation": {
+		'before_validate': "techievolve.api.quotation_before_validate"
 	}
 }
 

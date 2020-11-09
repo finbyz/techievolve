@@ -30,4 +30,5 @@ $.extend(shopping_cart, {
             });
         }
     },
+   
 })

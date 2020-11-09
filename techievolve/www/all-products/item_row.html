@@ -1,0 +1,31 @@
+<div class="card mb-12">
+	<div class="row no-gutters">
+		<div class="col-md-12">
+			<div class="card-body">
+				<a class="no-underline" href="/{{ item.route }}">
+					<div class=" image-width horizontal-image">
+					<img class="website-image img-pading" src="{{ item.website_image or item.image or 'no-image.jpg' }}" alt="{{ item.item_name }}"style="width:100% !important">
+				</div>
+				</a>
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div class="card-main">	
+				<div class="card-body d-flex flex-column align-item-stretch">
+					
+			
+						<h5 class="card-title">
+							<a class="text-dark" href="/{{ item.route }}">
+								{{ item.item_name or item.name}} 
+							</a>
+						</h5>
+						<p class="card-text">
+							{{ item.website_description or item.description or '<i class="text-muted">No description</i>' }}
+						</p>
+					</div>	
+				</div>
+				<a href="/{{ item.route }}" class="btn btn-sm btn-light align-items-end">{{ _('More details') }}</a>
+			
+		</div>
+	</div>
+</div>
