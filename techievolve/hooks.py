@@ -146,3 +146,6 @@ doc_events = {
 override_doctype_dashboards = {
 	"Supplier": "techievolve.techievolve.dashboard.supplier.get_data",
 }
+
+
+fixtures = ["Custom Field", "Custom Script"]
