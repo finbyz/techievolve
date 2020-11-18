@@ -6,14 +6,14 @@
         {{ item.item_name }}
         <br>
         {{ item.description }}
-        {% if item.product_info.stock_qty[0] %}
+        {% if item.is_stock_item%}
         <br>
-        <span>Available in Stock: {{item.product_info.stock_qty[0]}}</span>
+        <span>Available in Stock: {{item.stock_qty[0]}}</span>
         {% endif %}
     </td>
-    <td width="10%" class="rate-{{item.item_code}}" align="right">{{ item.product_info.price.formatted_price}}</td>
+    <td width="10%" class="rate-{{item.item_code}}" align="right">{{ item.price.formatted_price}}</td>
     <td width="10%">
-        <p class="d-none currency-{{item.item_code}}">{{ item.product_info.price.currency_symbol}}</p><span
+        <p class="d-none currency-{{item.item_code}}">{{ item.price.currency_symbol}}</p><span
             class="case-qty-{{item.item_code}}">{{ frappe.db.get_value('Item',item.item_code,'case_qty') }}</span>
     </td>
     <td width="15%">
@@ -59,7 +59,7 @@
         // var case_qty = parseFloat(btn.closest('.case-qty-{{item.item_code}}').html());
         //var rate = parseFloat(btn.closest('.rate-{{item.item_code}}').html().replace(/[^\d\.]/, ''));
         //var total = (newVal * case_qty * rate).toFixed(2);
-        //var currency = "{{ item.product_info.price.currency_symbol}}"
+        //var currency = "{{ item.price.currency_symbol}}"
         //var formatted_total = currency + total;
 
         //btn.closest('.total-{{item.item_code}}').html(formatted_total)
@@ -87,8 +87,6 @@
 
     frappe.ready(() => {
         $('.page_content').on('click', '.btn-add-to-cart-{{ item.item_code }}', (e) => {
-            console.log('call');
-            console.log(e);
 
             const $btn = $(e.currentTarget);
 
