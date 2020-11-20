@@ -2,7 +2,7 @@
 
 {% block title %}{{ _('Products') }}{% endblock %}
 {% block header %}
-<h1>{{ _('Products') }}</h1>
+<h1 class="ml-4">{{ _('Products') }}</h1>
 {% endblock header %}
 
 {% block page_content %}
@@ -31,7 +31,7 @@
 </div>
 
 <div class="container products-list-container">
-	<div class=" products-list  finbyz row mx-1">
+	<div class=" products-list row mx-1">
 		{% if items %}
 			{% for item in items %}
 				{% include "techievolve/www/all-products/item_row.html" %}
