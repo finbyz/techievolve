@@ -88,7 +88,8 @@ app_include_html = "/assets/techievolve/js/techievolve.js"
 # }
 app_include_css = ["assets/css/techievolve.css"]
 doctype_js = {
-	"Supplier":"public/js/supplier.js"
+	"Supplier":"public/js/supplier.js",
+	"Purchase Order":"public/js/purchase_order.js"
 }
 doc_events = {
 	"Item":{

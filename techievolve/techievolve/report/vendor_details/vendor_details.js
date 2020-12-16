@@ -20,6 +20,8 @@ function new_purchase_order(supplier,items){
 		args:{
 			'supplier':supplier
 		},
+		freeze:true,
+		freeze_message:"Creating Purchase Order",
 		callback: function(r){
 			if (r.message){
 				frappe.set_route("Form","Purchase Order",r.message)
