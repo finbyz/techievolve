@@ -8,10 +8,10 @@
         {{ item.description }}
         {% if item.is_stock_item%}
         <br>
-        <span>Available in Stock: {{item.stock_qty[0]}}</span>
+        <span>Available in Stock: {{item.stock_qty[0] or 0}}</span>
         {% endif %}
     </td>
-    <td width="10%" class="rate-{{item.item_code}}" align="right">{{ item.price.formatted_price}}</td>
+    <td width="10%" class="rate-{{item.item_code}}" align="right">{{ item.price.formatted_price or 0}}</td>
     <td width="10%">
         <p class="d-none currency-{{item.item_code}}">{{ item.price.currency_symbol}}</p><span
             class="case-qty-{{item.item_code}}">{{ frappe.db.get_value('Item',item.item_code,'case_qty') }}</span>
