@@ -87,7 +87,8 @@ function create_stock_entry(warehouse,supplier,item_code,balance_qty,buying_unit
 		},
 		callback:function(r){
 			window.location.reload();
-			//frappe.query_report.refresh();
+			// $('.modal-content').css("display","none")
+			 
 		}
 	})
 }
