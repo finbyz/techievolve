@@ -1,5 +1,7 @@
 {
     "js/techieevolve.min.js": [
-        "public/js/techievolve_shopping_cart.js"
+        "public/js/techievolve_shopping_cart.js",
+        "public/js/techievolve/form/link_selector.js",
+        "public/js/techievolve/form/controls/link.js"
     ]
 }

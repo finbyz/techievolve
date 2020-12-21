@@ -87,9 +87,16 @@ app_include_html = "/assets/techievolve/js/techievolve.js"
 #	}
 # }
 app_include_css = ["assets/css/techievolve.css"]
+app_include_js = "assets/js/techieevolve.min.js"
+
 doctype_js = {
 	"Supplier":"public/js/supplier.js",
-	"Purchase Order":"public/js/purchase_order.js"
+	"Purchase Order":"public/js/purchase_order.js",
+	"Purchase Invoice":"public/js/purchase_invoice.js",
+	"Purchase Receipt":"public/js/purchase_receipt.js",
+	"Sales Order":"public/js/sales_order.js",
+	"Sales Invoice":"public/js/sales_invoice.js",
+	"Delivery Note":"public/js/delivery_note.js"
 }
 doc_events = {
 	"Item":{
@@ -136,6 +143,9 @@ doc_events = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "techievolve.event.get_events"
 # }
+override_whitelisted_methods = {
+	"frappe.desk.search.search_link": "techievolve.api.search_link"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
