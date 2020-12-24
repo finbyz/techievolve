@@ -35,13 +35,19 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if filters.get('supplier'):
 		where_condition =  "and tabItem.name in (select parent from `tabItem Supplier` where supplier = '{}')".format(filters.get('supplier'))
 
-	items = frappe.db.sql("""select tabItem.name, tabItem.image,
+	items = frappe.db.sql("""select tabItem.name, tabItem.image,bin.actual_qty,
+		tabItem.case_qty, tabItem.master_case_qty,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
-		tabItem.item_group,if((bin.actual_qty>0)
+		tabItem.item_group
 		{columns}
 		from tabItem
-		
+		LEFT JOIN (
+		  SELECT b.item_code as item, round(sum(b.actual_qty),2) as actual_qty
+		  FROM `tabBin` as b
+		  GROUP BY b.item_code
+		) as bin ON (tabItem.name = bin.item and tabItem.is_stock_item = 1) 
+
 		where tabItem.docstatus < 2
 			and tabItem.has_variants=0
 			and tabItem.disabled=0
@@ -50,12 +56,11 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
 			 {mcond}
-		
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, tabItem.name), locate(%(_txt)s, tabItem.name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
-			idx desc,
-			name, item_name
+			tabItem.idx desc,
+			tabItem.name, item_name
 		limit %(start)s, %(page_len)s """.format(
 			columns=columns,
 			where_condition = where_condition,

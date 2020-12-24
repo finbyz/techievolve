@@ -82,16 +82,23 @@ frappe.ui.form.LinkSelector = Class.extend({
 			if (r.values.length) {
 				$.each(r.values, function (i, v) {
 					var row = $(repl('<div class="row link-select-row">\
-						<div class="col-xs-3">\
+						<div class="col-xs-2">\
 						<b><a href="#">%(image)s</a></b></div>\
+						<div class="col-xs-2">\
+							<b><a href="#">%(name)s</a></b><br>\
+							<span class="text-muted">Qty: %(qty)s</span></div>\
 						<div class="col-xs-3">\
-							<b><a href="#">%(name)s</a></b></div>\
-						<div class="col-xs-6">\
+							<b><span>Case Qty: </b>%(case)s</span><br>\
+							<b><span>MC Qty: </b>%(mc)s</span></div>\
+						<div class="col-xs-5">\
 							<span class="text-muted">%(values)s</span></div>\
 						</div>', {
 							name: v[0],
 							image: v[1],
-							values: v.splice(2).join(", ")
+							qty: v[2],
+							case: v[3],
+							mc: v[4],
+							values: v.splice(5).join(", ")
 						})).appendTo(parent);
 
 					row.find("a")
