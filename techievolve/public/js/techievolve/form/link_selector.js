@@ -144,7 +144,7 @@ frappe.ui.form.LinkSelector = Class.extend({
 		var d = null;
 		if (this.qty_fieldname) {
 			frappe.prompt({
-				fieldname: "qty", fieldtype: "Float", label: "Qty",
+				fieldname: "qty", fieldtype: "Int", label: "Qty",
 				"default": 1, reqd: 1
 			}, function (data) {
 				$.each(me.target.frm.doc[me.target.df.fieldname] || [], function (i, d) {

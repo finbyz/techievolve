@@ -97,7 +97,8 @@ doctype_js = {
 	"Sales Order":"public/js/sales_order.js",
 	"Sales Invoice":"public/js/sales_invoice.js",
 	"Delivery Note":"public/js/delivery_note.js",
-	"Stock Entry":"public/js/stock_entry.js"
+	"Stock Entry":"public/js/stock_entry.js",
+	"Material Request": "public/js/material_request.js"
 }
 doc_events = {
 	"Item":{
