@@ -86,8 +86,8 @@ function create_stock_entry(warehouse,supplier,item_code,balance_qty,buying_unit
 			buying_unit_price:buying_unit_price
 		},
 		callback:function(r){
-			window.location.reload();
-			// $('.modal-content').css("display","none")
+			// window.location.reload();
+			$(".modal").modal('hide');
 			 
 		}
 	})
