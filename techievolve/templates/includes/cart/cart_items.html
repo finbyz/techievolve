@@ -43,7 +43,7 @@
             {{ d.get_formatted('amount') }}
         </div>
         <span class="text-muted">
-            {{ _('Rate:') }} {{ d.get_formatted('rate') }}
+            {{ _('Rate:') }} $ {{ frappe.db.get_value('Item',d.item_code,'unit_selling_price') or (d.rate/frappe.db.get_value('Item',d.item_code,'case_qty')) }}
         </span>
     </td>
     {% endif %}

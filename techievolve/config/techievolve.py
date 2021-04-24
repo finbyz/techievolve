@@ -46,7 +46,19 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Discontinued Items",
+					"name": "Discontinued Item Report",
+					"doctype": "Item",
+					"is_query_report": False
+				},
+				{
+					"type": "report",
+					"name": "Open Orders",
+					"doctype": "Sales Order",
+					"is_query_report": False
+				},
+				{
+					"type": "report",
+					"name": "JC Item List",
 					"doctype": "Item",
 					"is_query_report": False
 				},

@@ -11,7 +11,7 @@
         <span>Available in Stock: {{item.stock_qty[0] or 0}}</span>
         {% endif %}
     </td>
-    <td width="10%" class="rate-{{item.item_code}}" align="right">{{ item.price.formatted_price or 0}}</td>
+    <td width="10%" class="rate-{{item.item_code}}" align="right">$ {{ frappe.db.get_value('Item',item.item_code,'unit_selling_price') or (item.price/frappe.db.get_value('Item',item.item_code,'case_qty')) }}</td>
     <td width="10%">
         <p class="d-none currency-{{item.item_code}}">{{ item.price.currency_symbol}}</p><span
             class="case-qty-{{item.item_code}}">{{ frappe.db.get_value('Item',item.item_code,'case_qty') }}</span>
@@ -21,7 +21,7 @@
             <span class="input-group-prepend d-none d-sm-inline-block">
                 <button class="btn btn-outline-secondary cart-btn btn-{{item.item_code}}" data-dir="dwn">–</button>
             </span>
-            <input class="form-control text-right cart-qty cart-qty-{{ item.item_code}} border-secondary" "
+            <input class="form-control text-right cart-qty cart-qty-{{ item.item_code}} border-secondary"
                                 value=" 0" data-item-code="{{ item.item_code }}">
             <span class="input-group-append d-none d-sm-inline-block">
                 <button class="btn btn-outline-secondary cart-btn btn-{{item.item_code}}" data-dir="up">+</button>
@@ -77,7 +77,8 @@
     function cost_calculation(qty, item_code) {
         // var qty = btn.val();
         var case_qty = parseFloat($('.case-qty-' + item_code).html());
-        var rate = parseFloat($('.rate-' + item_code).html().replace(/[^\d\.]/, ''));
+        // var rate = parseFloat($('.rate-' + item_code).html().replace(/[^\d\.]/, ''));
+		var rate = parseFloat($('.rate-' + item_code).html().replace("$", ''));
         var total = (qty * case_qty * rate).toFixed(2);
         var currency = $('.currency-' + item_code).html()
         var formatted_total = currency + total;

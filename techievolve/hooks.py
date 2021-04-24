@@ -110,6 +110,9 @@ doc_events = {
 	},
 	"Quotation": {
 		'before_validate': "techievolve.api.quotation_before_validate"
+	},
+	"Delivery Note": {
+		"before_submit": "techievolve.techievolve.doc_events.delivery_note.before_submit"
 	}
 }
 

@@ -86,7 +86,8 @@ frappe.ui.form.LinkSelector = Class.extend({
 						<b><a href="#">%(image)s</a></b></div>\
 						<div class="col-xs-2">\
 							<b><a href="#">%(name)s</a></b><br>\
-							<span class="text-muted">Qty: %(qty)s</span></div>\
+							<span class="text-muted">Qty: %(qty)s</span><br>\
+							<span class="text-muted">Added: <strong>0</strong></span></div>\
 						<div class="col-xs-3">\
 							<b><span>Case Qty: </b>%(case)s</span><br>\
 							<b><span>MC Qty: </b>%(mc)s</span></div>\
@@ -120,6 +121,7 @@ frappe.ui.form.LinkSelector = Class.extend({
 							}
 							return false;
 						})
+					row.find("strong").attr("id", v[0])
 				})
 			} else {
 				$('<p><br><span class="text-muted">' + __("No Results") + '</span>'
@@ -144,7 +146,7 @@ frappe.ui.form.LinkSelector = Class.extend({
 		var d = null;
 		if (this.qty_fieldname) {
 			frappe.prompt({
-				fieldname: "qty", fieldtype: "Int", label: "Qty",
+				fieldname: "qty", fieldtype: "Float", label: "Qty",
 				"default": 1, reqd: 1
 			}, function (data) {
 				$.each(me.target.frm.doc[me.target.df.fieldname] || [], function (i, d) {
@@ -164,7 +166,9 @@ frappe.ui.form.LinkSelector = Class.extend({
 						() => frappe.model.set_value(d.doctype, d.name, me.fieldname, value),
 						() => frappe.timeout(0.5),
 						() => frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, data.qty),
-						() => frappe.show_alert(__("Added {0} ({1})", [value, data.qty]))
+						() => frappe.show_alert(__("Added {0} ({1})", [value, data.qty])),
+						() => $("#"+d.item_code).html(data.qty),
+						() => $("#"+d.item_code).closest('span[class^="text-muted"]').addClass("highlighted")
 					]);
 				}
 			}, __("Set Quantity"), __("Set"));
