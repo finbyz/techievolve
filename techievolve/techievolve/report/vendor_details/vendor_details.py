@@ -31,7 +31,7 @@ def get_data(filters):
 			po_amount = frappe.db.sql("""select SUM(po.total) as po_amount from `tabPurchase Order` as po where po.docstatus=1 and po.supplier='{}'""".format(d['supplier']))
 			if po_amount:
 				d['po_amount'] = po_amount[0][0]
-			mr_amount = frappe.db.sql("""select SUM(mr.amount) as mr_amount from `tabMaterial Request Item` as mr JOIN `tabMaterial Request` as m on m.name = mr.parent where m.status <> "Ordered" and mr.docstatus=1 and mr.supplier ='{}'""".format(d['supplier']))
+			mr_amount = frappe.db.sql("""select SUM(mr.amount) as mr_amount from `tabMaterial Request Item` as mr JOIN `tabMaterial Request` as m on m.name = mr.parent where m.status <> "Ordered" and mr.docstatus=1 and mr.ordered_qty < mr.qty and mr.supplier ='{}'""".format(d['supplier']))
 			if mr_amount:
 				d['mr_amount'] = mr_amount[0][0]
 			if d['mr_amount']:

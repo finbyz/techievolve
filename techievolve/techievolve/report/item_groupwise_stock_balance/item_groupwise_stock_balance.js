@@ -22,8 +22,6 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			if (column.fieldname=="item_group") {
 				value = data.item_group || value;
 	
-				column.link_onclick =
-					"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
 				column.is_tree = true;
 			}
 	

@@ -11,7 +11,7 @@
         <span>Available in Stock: {{item.stock_qty[0] or 0}}</span>
         {% endif %}
     </td>
-    <td width="10%" class="rate-{{item.item_code}}" align="right">$ {{ frappe.db.get_value('Item',item.item_code,'unit_selling_price') or (item.price/frappe.db.get_value('Item',item.item_code,'case_qty')) }}</td>
+    <td width="10%" class="rate-{{item.item_code}}" align="right">$ {{ "{0:.2f}".format(frappe.db.get_value('Item',item.item_code,'unit_selling_price')) or ("{0:.2f}".format(item.price/frappe.db.get_value('Item',item.item_code,'case_qty'))) }}</td>
     <td width="10%">
         <p class="d-none currency-{{item.item_code}}">{{ item.price.currency_symbol}}</p><span
             class="case-qty-{{item.item_code}}">{{ frappe.db.get_value('Item',item.item_code,'case_qty') }}</span>

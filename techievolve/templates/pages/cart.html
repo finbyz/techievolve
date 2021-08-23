@@ -50,7 +50,15 @@
 	{% if doc.items %}
 		<div class="place-order-container">
 			{% if cart_settings.enable_checkout %}
-				<button class="btn btn-primary btn-place-order" type="button">
+		
+			<div id="payment_method">
+				<p><strong>Payment Method</strong></p>
+				<div class="payment-option"><input type="radio" value="Pay pal" name="payment_method" checked>PayPal</div>
+				<div class="payment-option"><input type="radio" value="Cash" name="payment_method">Cash<br></div>
+				<div class="payment-option"><input type="radio" value="Cheque" name="payment_method">Cheque<br></div>
+			</div>
+			<div style="clear: both;"></div>
+				<button class="btn btn-primary btn-place-order_" type="button">
 					{{ _("Place Order") }}
 				</button>
 			{% else %}
@@ -111,6 +119,7 @@
 
 {% endblock %}
 
+
 {% block base_scripts %}
 <!-- js should be loaded in body! -->
 <script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
@@ -118,4 +127,37 @@
 <script type="text/javascript" src="/assets/js/control.min.js"></script>
 <script type="text/javascript" src="/assets/js/dialog.min.js"></script>
 <script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+<script>
+	$(".btn-place-order_").on("click", function() {
+		place_order(this,$("#payment_method input:checked").val());
+	});
+	function place_order(btn,payment_method) {
+		return frappe.call({
+			type: "POST",
+			method: "techievolve.api.place_order",
+			btn: btn,
+			args:{
+				payment_method: payment_method,
+			},
+			callback: function(r) {
+				if(r.exc) {
+					var msg = "";
+					if(r._server_messages) {
+						msg = JSON.parse(r._server_messages || []).join("<br>");
+					}
+
+					$("#cart-error")
+						.empty()
+						.html(msg || frappe._("Something went wrong!"))
+						.toggle(true);
+				} else {
+					$('.cart-container table').hide();
+					$(btn).hide();
+					window.location.href = '/orders/' + encodeURIComponent(r.message);
+				}
+			}
+		});
+	}
+	
+</script>
 {% endblock %}

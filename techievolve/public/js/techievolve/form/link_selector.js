@@ -81,13 +81,17 @@ frappe.ui.form.LinkSelector = Class.extend({
 			}
 			if (r.values.length) {
 				$.each(r.values, function (i, v) {
+					var qty = 0;
+					if(parseInt($(".pro-qty-"+v[0]).text()) > 0) {
+						qty = $(".pro-qty-"+v[0]).last().text();
+					}
 					var row = $(repl('<div class="row link-select-row">\
 						<div class="col-xs-2">\
 						<b><a href="#">%(image)s</a></b></div>\
 						<div class="col-xs-2">\
 							<b><a href="#">%(name)s</a></b><br>\
 							<span class="text-muted">Qty: %(qty)s</span><br>\
-							<span class="text-muted">Added: <strong>0</strong></span></div>\
+							<span class="text-muted">Added: <strong>'+qty+'</strong></span></div>\
 						<div class="col-xs-3">\
 							<b><span>Case Qty: </b>%(case)s</span><br>\
 							<b><span>MC Qty: </b>%(mc)s</span></div>\
@@ -121,7 +125,7 @@ frappe.ui.form.LinkSelector = Class.extend({
 							}
 							return false;
 						})
-					row.find("strong").attr("id", v[0])
+					row.find("strong").attr("class", "pro-qty-"+v[0])
 				})
 			} else {
 				$('<p><br><span class="text-muted">' + __("No Results") + '</span>'
@@ -152,6 +156,8 @@ frappe.ui.form.LinkSelector = Class.extend({
 				$.each(me.target.frm.doc[me.target.df.fieldname] || [], function (i, d) {
 					if (d[me.fieldname] === value) {
 						frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, data.qty);
+						$(".pro-qty-"+d.item_code).each(function(){ $(this).text(data.qty) });
+						$(".pro-qty-"+d.item_code).each(function(){ $(this).closest('span[class^="text-muted"]').addClass("highlighted") });
 						frappe.show_alert(__("Added {0} ({1})", [value, d[me.qty_fieldname]]));
 						updated = true;
 						return false;
@@ -167,8 +173,8 @@ frappe.ui.form.LinkSelector = Class.extend({
 						() => frappe.timeout(0.5),
 						() => frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, data.qty),
 						() => frappe.show_alert(__("Added {0} ({1})", [value, data.qty])),
-						() => $("#"+d.item_code).html(data.qty),
-						() => $("#"+d.item_code).closest('span[class^="text-muted"]').addClass("highlighted")
+						() => $(".pro-qty-"+d.item_code).each(function(){ $(this).text(data.qty) }),
+						() => $(".pro-qty-"+d.item_code).each(function(){ $(this).closest('span[class^="text-muted"]').addClass("highlighted") })
 					]);
 				}
 			}, __("Set Quantity"), __("Set"));

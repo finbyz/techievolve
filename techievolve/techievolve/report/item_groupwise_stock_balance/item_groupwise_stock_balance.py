@@ -28,7 +28,8 @@ def execute(filters=None):
 		{
 			"label": _("Item Code"),
 			"fieldname": "item_code",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "Item",
 			"width": 100,
 		},
 		{
@@ -135,8 +136,7 @@ def get_final_out (out):
 		if row.item_code and not row.image:
 			row.image = "<div><p>No Image</p></div>"
 			flag = 1  
-		if flag == 1:
-			data.append(row)
+		data.append(row)
 	return data
 		
 

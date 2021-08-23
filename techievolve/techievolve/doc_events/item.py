@@ -10,23 +10,47 @@ def before_validate(self, method):
 	for x in self.uoms:
 		if x.uom == "Case":
 			case_flag = False
-			x.conversion_factor = self.case_qty
+			if self.stock_uom == "Nos":
+				x.conversion_factor = self.case_qty
+			elif self.stock_uom == "Case":
+				x.conversion_factor = 1
 		
 		if x.uom == "Master Case":
 			master_case_flag = False
-			x.conversion_factor = self.master_case_qty
-	
-	if case_flag:
-		self.append('uoms', {
-			'uom': 'Case',
-			'conversion_factor': self.case_qty
-		})
+			if self.stock_uom == "Nos":
+				x.conversion_factor = self.master_case_qty
+			elif self.stock_uom == "Case":
+				x.conversion_factor = self.master_case_qty / self.case_qty
 
-	if master_case_flag:
-		self.append('uoms', {
-			'uom': 'Master Case',
-			'conversion_factor': self.master_case_qty
-		})
+
+	if self.stock_uom == "Case":
+		if case_flag:
+			self.append('uoms',{
+				'uom':'Case',
+				'conversion_factor':1
+			})
+		if master_case_flag:
+			self.append('uoms',{
+				'uom':'Master Case',
+				'conversion_factor':self.master_case_qty / self.case_qty			
+			})
+
+	elif self.stock_uom == 'Nos':
+		if case_flag:
+			self.append('uoms', {
+				'uom': 'Case',
+				'conversion_factor': self.case_qty
+			})
+
+		if master_case_flag:
+			self.append('uoms', {
+				'uom': 'Master Case',
+				'conversion_factor': self.master_case_qty
+			})
+
+def validate(self,method):
+	if self.supplier_items:
+		self.supplier = frappe.db.get_value("Item Supplier",{'parent':self.name},"supplier")
 
 def on_update(self,method):
 	create_item_price(self)

@@ -14,6 +14,10 @@ app_license = "GPL 3.0"
 # Includes in <head>
 # ------------------
 
+website_context = {
+	"splash_image": "/files/DK.png"
+}
+
 # include js, css files in header of desk.html
 # app_include_css = "/assets/techievolve/css/techievolve.css"
 # app_include_js = "/assets/techievolve/js/techievolve.js"
@@ -103,6 +107,7 @@ doctype_js = {
 doc_events = {
 	"Item":{
 		"before_validate": "techievolve.techievolve.doc_events.item.before_validate",
+		"validate": "techievolve.techievolve.doc_events.item.validate",
 		"on_update": "techievolve.techievolve.doc_events.item.on_update",
 	},
 	"Material Request":{
@@ -113,8 +118,19 @@ doc_events = {
 	},
 	"Delivery Note": {
 		"before_submit": "techievolve.techievolve.doc_events.delivery_note.before_submit"
+	},
+	"Purchase Order":{
+		"validate":"techievolve.api.po_validate"
+	},
+	"Sales Order":{
+		"on_submit": "techievolve.techievolve.doc_events.sales_order.on_submit"
 	}
 }
+
+# override for customer taxid
+from erpnext.portal import utils
+from techievolve.api import create_customer_or_supplier
+utils.create_customer_or_supplier = create_customer_or_supplier
 
 # Scheduled Tasks
 # ---------------
