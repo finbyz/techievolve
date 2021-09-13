@@ -102,7 +102,8 @@ doctype_js = {
 	"Sales Invoice":"public/js/sales_invoice.js",
 	"Delivery Note":"public/js/delivery_note.js",
 	"Stock Entry":"public/js/stock_entry.js",
-	"Material Request": "public/js/material_request.js"
+	"Material Request": "public/js/material_request.js",
+	"Customer": "public/js/customer.js",
 }
 doc_events = {
 	"Item":{
@@ -121,6 +122,9 @@ doc_events = {
 	},
 	"Purchase Order":{
 		"validate":"techievolve.api.po_validate"
+	},
+	"Purchase Receipt":{
+		"validate":"techievolve.techievolve.doc_events.purchase_receipt.validate"
 	},
 	"Sales Order":{
 		"on_submit": "techievolve.techievolve.doc_events.sales_order.on_submit"

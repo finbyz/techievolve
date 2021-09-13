@@ -51,6 +51,8 @@ def before_validate(self, method):
 def validate(self,method):
 	if self.supplier_items:
 		self.supplier = frappe.db.get_value("Item Supplier",{'parent':self.name},"supplier")
+	else:
+		self.supplier = ""
 
 def on_update(self,method):
 	create_item_price(self)

@@ -12,3 +12,9 @@ this.frm.cscript.onload = function(frm) {
     }	
 });
 }
+frappe.ui.form.on('Purchase Receipt Item', {
+    unit_buying_price: function(frm,cdt,cdn){
+        let d = locals[cdt][cdn]
+        frappe.model.set_value(d.doctype, d.name, 'rate', flt(d.unit_buying_price * d.case_qty))
+    }
+});
