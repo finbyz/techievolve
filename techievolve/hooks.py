@@ -136,6 +136,12 @@ from erpnext.portal import utils
 from techievolve.api import create_customer_or_supplier
 utils.create_customer_or_supplier = create_customer_or_supplier
 
+
+# override bcz getting 404 error in thirt party files
+from frappe.website import render
+from techievolve.api import add_preload_headers as my_add_preload_headers
+render.add_preload_headers = my_add_preload_headers
+
 # Scheduled Tasks
 # ---------------
 
@@ -169,7 +175,8 @@ utils.create_customer_or_supplier = create_customer_or_supplier
 # 	"frappe.desk.doctype.event.event.get_events": "techievolve.event.get_events"
 # }
 override_whitelisted_methods = {
-	"frappe.desk.search.search_link": "techievolve.api.search_link"
+	"frappe.desk.search.search_link": "techievolve.api.search_link",
+	"erpnext.shopping_cart.cart.update_cart": "techievolve.api.update_cart"
 }
 #
 # each overriding function accepts a `data` argument;

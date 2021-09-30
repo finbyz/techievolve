@@ -40,11 +40,11 @@
                 <table class="table table-bordered mt-3">
                     <thead>
                         <tr>
-                            <th width="16%">{{ _('Image') }}</th>
+                            <th width="20%">{{ _('Image') }}</th>
                             <th width="35%">{{ _('Item') }}</th>
                             <th width="10%">{{ _('Price') }}</th>
                             <th width="10%">{{ _('Case Qty') }}</th>
-                            <th width="19%" class="text-right">{{ _('Quantity') }}</th>
+                            <th width="15%" class="text-right">{{ _('Quantity') }}</th>
                             <th width="20%" class="text-right">{{ _('Subtotal') }}</th>
                         </tr>
                     </thead>
@@ -169,7 +169,7 @@
                     callback: function (r) {
                         set_cart_count();
                         if (r.message.shopping_cart_menu) {
-                            console.log(r.message.shopping_cart_menu)
+                            
                             $('.shopping-cart-menu').html(r.message.shopping_cart_menu);
                         }
                         $btn.prop('disabled', false);

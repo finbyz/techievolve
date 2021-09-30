@@ -53,8 +53,8 @@
 		
 			<div id="payment_method">
 				<p><strong>Payment Method</strong></p>
-				<div class="payment-option"><input type="radio" value="Pay pal" name="payment_method" checked>PayPal</div>
-				<div class="payment-option"><input type="radio" value="Cash" name="payment_method">Cash<br></div>
+				<div class="payment-option"><input type="radio" value="Cash" name="payment_method" checked>Cash</div>
+				<div class="payment-option"><input type="radio" value="Pay pal" name="payment_method">PayPal<br></div>
 				<div class="payment-option"><input type="radio" value="Cheque" name="payment_method">Cheque<br></div>
 			</div>
 			<div style="clear: both;"></div>
@@ -153,6 +153,7 @@
 				} else {
 					$('.cart-container table').hide();
 					$(btn).hide();
+					
 					window.location.href = '/orders/' + encodeURIComponent(r.message);
 				}
 			}

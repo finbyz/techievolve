@@ -1,55 +1,106 @@
-{% set parent_item_group = frappe.get_all("Item Group",{'parent_item_group':'All Item Groups','show_in_website':1}) %}
+{% set parent_item_group = frappe.get_all("Item Group",{'parent_item_group':'All Item Groups','show_in_website':1}, order_by="parent_item_group") %}
 {% set data = {} %}
 
 {% for item_group in parent_item_group %}
 {% set _ = data.update({item_group.name:frappe.get_all('Item Group',{'parent_item_group':item_group.name})}) %}
 {% endfor%}
 
+<div class="page-header">
+<div class="dollar-king-menu">
+<div class="left-panel-menu">      
+<!-- menu -->
+<div id="MainMenu">
+<div class="list-group panel">
+{% for key, value in data.items() %}
+{% set parent_doc = frappe.get_doc("Item Group",key)%}
+<div>
+<a href="#{{ parent_doc.name|replace(' ','') }}" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">{{ parent_doc.name }}  <i class="fa fa-caret-down"></i></a>
+<div class="collapse" id="{{ parent_doc.name|replace(' ','') }}">
+{% for v in value %}
+{% set child_doc = frappe.get_doc("Item Group",v['name']) %} 	
+{% if child_doc.name == name %}
+<a href="/{{child_doc.route}}" class="list-group-item current">{{ child_doc.name }}</a>
+{% else %}
+<a href="/{{child_doc.route}}" class="list-group-item">{{ child_doc.name }}</a>
+{% endif %}
 
+{% endfor %}
+</div>
+</div>
+{% endfor%}
+</div>
+</div>
+</div>
+</div>
+</div>
 
-
-<div class="page-header"><div class="dollar-king-menu">
-    <a href="javascript:void(0)" class="open-cat"><i class="fa fa-bars" aria-hidden="true"></i> SHOP BY CATEGORY</a> 
-    <div class="top-cat" style="display:none;">
-        <ul class="top-label">
-            {% for key, value in data.items() %}
-            {% set parent_doc = frappe.get_doc("Item Group",key)%}
-            <li><a href="/{{ parent_doc.route }}" class="has-child" id="{{ parent_doc.name|replace(' ','') }}">{{ parent_doc.name }}</a></li>
-            {% endfor%}
-            </ul>
-    </div>
-</div>
-<div class="custom-menu-block">
-<div class="child-cat">
-    {% for key, value in data.items() %} 
-    <div id="child{{key|replace(' ','')}}" class="subcat-inner">
-        <ul class="cal-listing">
-            {% for v in value %}
-            {% set child_doc = frappe.get_doc("Item Group",v['name']) %}    
-            <li><a href="/{{child_doc.route}}">{{ child_doc.name }}</a></li>
-            {% endfor %}
-        </ul>
-        <div class="cat-img-inner"><img src="{{ frappe.db.get_value('Item Group',key,'image') }}" style="display: inline-block;"></div>
-    </div>
-    {% endfor %}
-</div>
-</div>
-</div>
 <script>
-     $('.top-cat li a').hover(function() {
-        let id = $(this).attr('id')
-    	$('.child-cat .subcat-inner').each(function() {
-    		$(this).removeClass('active');
-    	});
-    	$('.top-label a').each(function() {
-    		$(this).removeClass('activeP');
-    	});
-    	$(`#${id}`).addClass('activeP');
-    	$(`#child${id}`).addClass('active');
-    }, function() {
-    	if ($('.child-cat').hasClass('active')) {} else {
-    		$(`#${id}`).removeClass('activeP');
-    		$(`#child${id}`).removeClass('active');
-    	}
+    $(document).ready(function($) {
+		var visitedUrl = $.cookie('visited') ? $.cookie('visited').split(",") : [];
+		
+		$("#MainMenu a").each(function(){
+			if(visitedUrl.includes(this.href)){
+			   $(this).css("color","Red");
+			}
+		});
+		
+		var currentUrl = window.location.href;
+        
+		if(!visitedUrl.includes(currentUrl))
+        {
+		   	visitedUrl.push(currentUrl);
+			var string = visitedUrl.join(",");
+            
+            var date = new Date();
+            var minutes = 21600;
+            date.setTime(date.getTime() + (minutes * 60 * 1000));
+            
+			$.cookie('visited', string, {expires: date, path:'/', secure: true});
+		}
     });
 </script>
+<script>
+    $(document).ready(function() {
+		$('.top-cat li a').hover(function() {
+			let id = $(this).attr('id');
+			$('.child-cat .subcat-inner').each(function() {
+				$(this).removeClass('active');
+			});
+			$('.top-label a').each(function() {
+				$(this).removeClass('activeP');
+			});
+			$(`#${id}`).addClass('activeP');
+			$(`#child${id}`).addClass('active');
+		}, function() {
+			if ($('.child-cat').hasClass('active')) {} else {
+				$(`#${id}`).removeClass('activeP');
+				$(`#child${id}`).removeClass('active');
+			}
+		});
+        
+        $(".current").parent().parent().children('.list-group-item-success').trigger("click");
+    });
+</script>
+<script>
+$(document).ready(function() {
+	$(".shop-cat-head i").click(function(){
+		$(".left-panel-menu").slideToggle();
+		$( this ).toggleClass( "fa-chevron-up fa-chevron-down" );
+	});	
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

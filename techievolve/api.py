@@ -1,10 +1,11 @@
 import frappe
 import json
-from frappe.utils import flt
 from erpnext.shopping_cart.cart import update_cart
 from frappe.desk.search import search_widget
-from frappe.utils import cstr, unique, cint
+from frappe.utils import flt,cstr, unique, cint
 from frappe import _
+from erpnext.shopping_cart.cart import _get_cart_quotation, get_cart_quotation, apply_cart_settings, get_shopping_cart_menu
+from erpnext.stock.utils import get_incoming_rate
 
 @frappe.whitelist()
 def update_cart_custom(item_data=[],ignore_permissions=True):
@@ -19,7 +20,7 @@ def quotation_before_validate(self,method):
 
 def get_price_list(self):
 	for row in self.items:
-		row.price_list_rate = row.stock_qty * frappe.db.get_value("Item Price",{'item_code':row.item_code,'price_list':self.selling_price_list,'selling':1},'price_list_rate')
+		row.price_list_rate = flt(row.stock_qty) * flt(frappe.db.get_value("Item Price",{'item_code':row.item_code,'price_list':self.selling_price_list,'selling':1},'price_list_rate'))
 
 @frappe.whitelist()
 def search_link(doctype, txt, query=None, filters=None, page_length=20, searchfield=None, reference_doctype=None, ignore_user_permissions=False):
@@ -45,16 +46,174 @@ def build_for_autosuggest(res):
 
 
 @frappe.whitelist()
+def update_cart(item_code, qty, additional_notes=None, with_items=False):
+	quotation = _get_cart_quotation()
+	
+	empty_card = False
+	qty = flt(qty)
+	if qty == 0:
+		quotation_items = quotation.get("items", {"item_code": ["!=", item_code]})
+		if quotation_items:
+			quotation.set("items", quotation_items)
+			quotation.save()
+		else:
+			empty_card = True
+			quotation.delete()
+			quotation = None
+	else:
+		quotation_items = quotation.get("items", {"item_code": item_code})
+		if not quotation_items:
+			if not quotation.name:
+				quotation.append("items", {
+					"doctype": "Quotation Item",
+					"item_code": item_code,
+					"qty": qty,
+					"stock_qty": qty,
+					"additional_notes": additional_notes
+				})
+				quotation.flags.ignore_permissions = True
+				quotation.save()
+			else:
+				item_args = {"item_code":item_code,'qty':qty,"company":quotation.company}
+				rate = get_incoming_rate(item_args) 
+				qcitem_name = frappe.generate_hash("",10)
+				if not frappe.db.exists("Quotation Item",qcitem_name):
+					frappe.db.sql("insert into `tabQuotation Item` (name,owner,docstatus,parent,parentfield,parenttype,item_code,item_name,qty,rate,amount,additional_notes) values ('{}','{}',{},'{}','{}','{}','{}','{}',{},{},{},'{}')".format(qcitem_name,frappe.session.user,0,quotation.name,"items","Quotation",item_code,frappe.db.get_value("Item",item_code,'item_name'),qty,rate,flt(rate*qty),additional_notes))
+				else:
+					qcitem_name = frappe.generate_hash("",10)
+				quotation.append("items", {
+					"doctype": "Quotation Item",
+					"item_code": item_code,
+					"qty": qty,
+					"stock_qty": qty,
+					"additional_notes": additional_notes
+				})
+			
+		else:
+			quotation_items[0].db_set('qty', qty)
+			quotation_items[0].db_set('amount', flt(qty*quotation_items[0].rate))
+			quotation_items[0].db_set('additional_notes', additional_notes)
+
+	apply_cart_settings(quotation=quotation)
+
+	# quotation.flags.ignore_permissions = True
+	# quotation.payment_schedule = []
+	# if not empty_card:
+	# 	quotation.save()
+	# else:
+	# 	quotation.delete()
+	# 	quotation = None
+
+	set_cart_count(quotation)
+
+	context = get_cart_quotation(quotation)
+
+	if cint(with_items):
+		return {
+			"items": frappe.render_template("templates/includes/cart/cart_items.html",
+				context),
+			"taxes": frappe.render_template("templates/includes/order/order_taxes.html",
+				context),
+		}
+	else:
+		return {
+			'name': quotation.name,
+			'shopping_cart_menu': get_shopping_cart_menu(context)
+		}
+
+@frappe.whitelist()
+def _update_cart(item_code, item_name, uom, qty, rate, amount, additional_notes=None):
+	quotation = _get_cart_quotation()
+	empty_card = False
+	qty = flt(qty)
+	if qty == 0:
+		quotation_items = quotation.get("items", {"item_code": ["!=", item_code]})
+		if quotation_items:
+			quotation.set("items", quotation_items)
+			frappe.db.sql("SET SQL_SAFE_UPDATES = 0")
+			frappe.db.sql("delete from `tabQuotation Item` where item_code = '{}'".format(item_code))
+			#quotation.save()
+		else:
+			empty_card = True
+			quotation.delete()
+			quotation = None
+	else:
+		quotation_items = quotation.get("items", {"item_code": item_code})
+		if not quotation_items:
+			if not quotation.name:
+				quotation.append("items", {
+					"doctype": "Quotation Item",
+					"item_code": item_code,
+					"qty": qty,
+					"stock_qty": qty,
+					"additional_notes": additional_notes
+				})
+				quotation.flags.ignore_permissions = True
+				quotation.save()
+			else:
+				# item_args = {"item_code":item_code,'qty':qty,"company":quotation.company}
+				# rate = get_incoming_rate(item_args) 
+				item_idx = cstr(len(quotation.get("items")) + 1)
+				qcitem_name = frappe.generate_hash("",10)
+				if not frappe.db.exists("Quotation Item",qcitem_name):
+					frappe.db.sql("insert into `tabQuotation Item` (idx,name,owner,docstatus,parent,parentfield,parenttype,item_code,item_name,qty,uom,description,rate,amount,additional_notes) values ('{}','{}','{}',{},'{}','{}','{}','{}','{}',{},'{}','{}',{},{},'{}')".format(item_idx,qcitem_name,frappe.session.user,0,quotation.name,"items","Quotation",item_code,item_name,qty,uom,item_name,flt(rate),flt(amount),additional_notes))
+				else:
+					qcitem_name = frappe.generate_hash("",10)
+				quotation.append("items", {
+					"doctype": "Quotation Item",
+					"item_code": item_code,
+					"qty": qty,
+					"stock_qty": qty,
+					"additional_notes": additional_notes
+				})
+			
+		else:
+			quotation_items[0].db_set('qty', qty)
+			quotation_items[0].db_set('amount', flt(qty*quotation_items[0].rate))
+			quotation_items[0].db_set('additional_notes', additional_notes)
+
+	# apply_cart_settings(quotation=quotation)
+
+	set_cart_count(quotation)
+
+	return quotation.name
+	# context = get_cart_quotation(quotation)
+	# if cint(with_items):
+	# 	return {
+	# 		"items": frappe.render_template("templates/includes/cart/cart_items.html",
+	# 			context),
+	# 		"taxes": frappe.render_template("templates/includes/order/order_taxes.html",
+	# 			context),
+	# 	}
+	# else:
+	# 	return {
+	# 		'name': quotation.name,
+	# 		'shopping_cart_menu': get_shopping_cart_menu(context)
+	# 	}
+
+def set_cart_count(quotation=None):
+	if not quotation:
+		quotation = _get_cart_quotation()
+	cart_count = cstr(len(quotation.get("items")))
+
+	if hasattr(frappe.local, "cookie_manager"):
+		frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
+
+@frappe.whitelist()
 def place_order(payment_method=None):
-	from erpnext.shopping_cart.cart import _get_cart_quotation
+	
 	from erpnext.utilities.product import get_qty_in_stock
 	
 	quotation = _get_cart_quotation()
 	cart_settings = frappe.db.get_value("Shopping Cart Settings", None,
 		["company", "allow_items_not_in_stock"], as_dict=1)
 	quotation.company = cart_settings.company
-
+	# finbyz changes
+	quotation.order_type = ""
+	quotation.order_type = "Shopping Cart"
 	quotation.flags.ignore_permissions = True
+	quotation.save()
+	# finbyz changes end
 	quotation.submit()
 
 	if quotation.quotation_to == 'Lead' and quotation.party_name:
@@ -311,3 +470,6 @@ def party_exists(doctype, user):
 def po_validate(self,method):
 	for item in self.items:
 		item.barcode = frappe.db.get_value("Item Barcode",{"parent":item.item_code},"barcode")
+
+def add_preload_headers(response):
+	pass

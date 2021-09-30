@@ -1,0 +1,59 @@
+{% set parent_item_group = frappe.get_all("Item Group",{'parent_item_group':'All Item Groups','show_in_website':1}) %}
+{% set data = {} %}
+
+{% for item_group in parent_item_group %}
+{% set _ = data.update({item_group.name:frappe.get_all('Item Group',{'parent_item_group':item_group.name})}) %}
+{% endfor%}
+
+
+
+
+<div class="page-header"><div class="dollar-king-menu">
+    <a href="javascript:void(0)" class="open-cat"><i class="fa fa-bars" aria-hidden="true"></i> SHOP BY CATEGORY</a> 
+    <div class="top-cat" style="display:none;">
+        <ul class="top-label">
+            {% for key, value in data.items() %}
+            {% set parent_doc = frappe.get_doc("Item Group",key)%}
+            <li><a href="/{{ parent_doc.route }}" class="has-child" id="{{ parent_doc.name|replace(' ','') }}">{{ parent_doc.name }}</a></li>
+				{% for v in value %}
+				{% set child_doc = frappe.get_doc("Item Group",v['name']) %}    
+				<span><a href="/{{child_doc.route}}">{{ child_doc.name }}</a></span>
+				{% endfor %}
+            {% endfor%}
+            </ul>
+    </div>
+</div>
+<div class="custom-menu-block">
+<div class="child-cat">
+    {% for key, value in data.items() %} 
+    <div id="child{{key|replace(' ','')}}" class="subcat-inner">
+        <ul class="cal-listing">
+            {% for v in value %}
+            {% set child_doc = frappe.get_doc("Item Group",v['name']) %}    
+            <li><a href="/{{child_doc.route}}">{{ child_doc.name }}</a></li>
+            {% endfor %}
+        </ul>
+        <div class="cat-img-inner"><img src="{{ frappe.db.get_value('Item Group',key,'image') }}" style="display: inline-block;"></div>
+    </div>
+    {% endfor %}
+</div>
+</div>
+</div>
+<script>
+     $('.top-cat li a').hover(function() {
+        let id = $(this).attr('id')
+    	$('.child-cat .subcat-inner').each(function() {
+    		$(this).removeClass('active');
+    	});
+    	$('.top-label a').each(function() {
+    		$(this).removeClass('activeP');
+    	});
+    	$(`#${id}`).addClass('activeP');
+    	$(`#child${id}`).addClass('active');
+    }, function() {
+    	if ($('.child-cat').hasClass('active')) {} else {
+    		$(`#${id}`).removeClass('activeP');
+    		$(`#child${id}`).removeClass('active');
+    	}
+    });
+</script>

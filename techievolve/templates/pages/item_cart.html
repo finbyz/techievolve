@@ -1,11 +1,12 @@
-{% set doc = frappe.get_doc('Item',item.name) %}
+
 <tr>
     <td width="20%" data-item-code={{item.item_code}}><a href="/{{item.route}}"><img
                 src="{{ item.website_image or item.image }}" alt="{{ item.name }}"></a></td>
     <td width="35%">
-        {{ item.item_name }}
+        <span class="item-name-{{item.item_code}}">{{ item.item_name }}</span>
         <br>
-        {{ item.description }}
+        <span class="item-description-{{item.item_code}}">{{ item.description }}</span>
+        <span class="item-uom-{{item.item_code}}">{{ item.stock_uom }}</span>
         {% if item.is_stock_item%}
         <br>
         <span>Available in Stock: {{item.stock_qty[0] or 0}}</span>
@@ -39,8 +40,15 @@
 <script>
     //frappe.provide("erpnext.shopping_cart");
     //var shopping_cart = erpnext.shopping_cart;
+    $(".cart-items-custom").on("change", ".cart-qty-{{item.item_code}}", function() {
+			var item_code = $(this).attr("data-item-code");
+			var newVal = $(this).val();
+			shopping_cart.shopping_cart_update({item_code, qty: newVal, cart_dropdown: true});
+           
+		});
+    var item_list = []
     $(".cart-items-custom").on('click', '.number-spinner .btn-{{item.item_code}}', function () {
-        var btn = $(this),
+            var btn = $(this),
             input = btn.closest('.number-spinner').find('input'),
             oldValue = input.val().trim(),
             newVal = 0;
@@ -56,13 +64,40 @@
 
         var item_code = input.attr("data-item-code");
         cost_calculation(newVal, item_code)
-        // var case_qty = parseFloat(btn.closest('.case-qty-{{item.item_code}}').html());
-        //var rate = parseFloat(btn.closest('.rate-{{item.item_code}}').html().replace(/[^\d\.]/, ''));
-        //var total = (newVal * case_qty * rate).toFixed(2);
-        //var currency = "{{ item.price.currency_symbol}}"
-        //var formatted_total = currency + total;
-
-        //btn.closest('.total-{{item.item_code}}').html(formatted_total)
+        
+        
+        item_list.push({
+            'item_code':item_code,
+            'qty': newVal
+        })
+        
+        // document.cookie = item_list
+        // console.log(document.cookie)
+        
+        // To add or remove qty from cart by clicking on + an - sign
+        var rate = parseFloat($('.rate-' + item_code).html().replace("$", '') * $('.case-qty-' + item_code).html())
+        var amount =  parseFloat($('.total-' + item_code).html().replace("$", ''))
+        var item_name = $('.item-name-' + item_code).html()
+        var uom = $('.item-uom-' + item_code).html()
+       
+        frappe.call({
+            'method': "techievolve.api._update_cart",
+            'args': {
+                'item_code': item_code,
+                'item_name': item_name,
+                'uom': uom,
+                'qty': newVal,
+                'rate': rate,
+                'amount': amount,
+                
+            },
+            callback: function(r){
+                shopping_cart.set_cart_count();
+            }
+        })
+      // shopping_cart.shopping_cart_update({item_code, qty: newVal, cart_dropdown: true});
+        
+      
         return false;
     });
     $(".cart-items-custom").on("change", ".cart-qty-{{ item.item_code }}", function () {
@@ -81,44 +116,22 @@
 		var rate = parseFloat($('.rate-' + item_code).html().replace("$", ''));
         var total = (qty * case_qty * rate).toFixed(2);
         var currency = $('.currency-' + item_code).html()
-        var formatted_total = currency + total;
+        var formatted_total = currency + " " +total;
         $('.total-' + item_code).html(formatted_total)
 
     }
 
-    frappe.ready(() => {
-        $('.page_content').on('click', '.btn-add-to-cart-{{ item.item_code }}', (e) => {
+    // frappe.ready(() => {
+    //     $('.page_content').on('click', '.btn-add-to-cart-{{ item.item_code }}', (e) => {
 
-            const $btn = $(e.currentTarget);
+    //         const $btn = $(e.currentTarget);
 
-            $btn.prop('disabled', true);
+    //         $btn.prop('disabled', true);
 
-            const item_code = $btn.data('item.item-code');
-            $('cart-items-custom tr td:first-child').addClass('test')
-            // console.log(item_code);
-            // var list=[];
-            // for(i=0;i<=2;i++){
-            //     list.push($('td').attr('data-item-code'));
-            // }
-            // $('thead').each(function() {
-            //     $('tr').each(function(){
-            //          var term = $('td').attr('data-item-code');
-            //          console.log(term);
-            //      });});
-            // console.log(list);
-
-
-            // erpnext.shopping_cart.update_cart({
-            // 	item_code,
-            // 	qty: 1,
-            // 	callback(r) {
-            // 		$btn.prop('disabled', false);
-            // 		if (r.message) {
-            // 			$('.btn-add-to-cart , .btn-view-in-cart').toggleClass('hidden');
-            // 		}
-            // 	}
-            // });
-        });
-    });
+    //         const item_code = $btn.data('item.item-code');
+    //         $('cart-items-custom tr td:first-child').addClass('test')
+            
+    //     });
+    // });
 </script>
 {% endblock %}

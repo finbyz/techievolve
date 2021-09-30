@@ -49,6 +49,7 @@
         window.dev_server = {{ dev_server }};
         window.socketio_port = {{ frappe.socketio_port }};
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 </head>
 
 <body frappe-session-status="{{ 'logged-in' if frappe.session.user != 'Guest' else 'logged-out'}}"
@@ -61,15 +62,20 @@
     {{ banner_html or "" }}
     {%- endif %}
     {%- endblock -%}
-
-    {%- block navbar -%}
+    
+{%- block navbar -%}
     {% include "templates/includes/navbar/navbar.html" %}
-    {%- endblock -%}
+    {%- endblock -%}    
+<div class="custom-frames">
+{% include "templates/includes/navbar/nav_menu.html" %}
+
+    
 
     {% block content %}
     {{ content }}
     {% endblock %}
-
+</div>
+<div style="clear: both;"></div>
     {%- block footer -%}
     {% include "templates/includes/footer/footer.html" %}
     {%- endblock -%}

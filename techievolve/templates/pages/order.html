@@ -8,7 +8,9 @@
 {% block title %}{{ doc.name }}{% endblock %}
 
 {% block header %}
+	<p class="place-order-message"></p>
 	<h1 class="m-0">{{ doc.name }}</h1>
+	
 {% endblock %}
 
 {% block header_actions %}
@@ -179,7 +181,13 @@
 {% endblock %}
 
 {% block script %}
-	<script> {% include "templates/pages/order.js" %} </script>
+	<script> {% include "templates/pages/order.js" %} 
+
+	if(document.referrer.includes("/cart")){
+		$('.place-order-message').html("Your Order has been submitted successfully.").css('color','#6fb31a')
+		setTimeout(() => {  $('.place-order-message').html('') }, 4000);
+	}
+	</script>
 	<script>
 		window.doc_info = {
 			customer: '{{doc.customer}}',
