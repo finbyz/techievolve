@@ -1,4 +1,7 @@
 {
+    "css/tech.css": [
+        "public/css/custom_report.css"
+    ],
     "js/techieevolve.min.js": [
         "public/js/techievolve_shopping_cart.js",
         "public/js/techievolve/form/link_selector.js",

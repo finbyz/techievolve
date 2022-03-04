@@ -1,4 +1,4 @@
-{% set parent_item_group = frappe.get_all("Item Group",{'parent_item_group':'All Item Groups','show_in_website':1}, order_by="weightage") %}
+{% set parent_item_group = frappe.get_all("Item Group",{'parent_item_group':'All Item Groups','show_in_website':1}, order_by="parent_item_group weightage") %}
 {% set data = {} %}
 
 {% for item_group in parent_item_group %}
@@ -10,15 +10,9 @@
 <div class="left-panel-menu">      
 <!-- menu -->
 <div id="MainMenu">
-	
-	{% set role_list = [] %}
-	{% for role in frappe.get_doc("User",frappe.session.user).roles %}
-	{% set _ =  role_list.append(role.role) %}
-	{% endfor %}
 <div class="list-group panel">
 {% for key, value in data.items() %}
 {% set parent_doc = frappe.get_doc("Item Group",key)%}
-{% if parent_doc.name != "Dollar King Plus"%}
 <div>
 <a href="#{{ parent_doc.name|replace(' ','') }}" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">{{ parent_doc.name }}  <i class="fa fa-caret-down"></i></a>
 <div class="collapse" id="{{ parent_doc.name|replace(' ','') }}">
@@ -33,23 +27,6 @@
 {% endfor %}
 </div>
 </div>
-{% else %}
-	{% if "DK Plus" in role_list %}
-	<div>
-		<a href="#{{ parent_doc.name|replace(' ','') }}" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">{{ parent_doc.name }}  <i class="fa fa-caret-down"></i></a>
-		<div class="collapse" id="{{ parent_doc.name|replace(' ','') }}">
-		{% for v in value %}
-			{% set child_doc = frappe.get_doc("Item Group",v['name']) %} 	
-			{% if child_doc.name == name %}
-			<a href="/{{child_doc.route}}" class="list-group-item current">{{ child_doc.name }}</a>
-			{% else %}
-			<a href="/{{child_doc.route}}" class="list-group-item">{{ child_doc.name }}</a>
-			{% endif %}
-		{% endfor %}
-		</div>
-	</div>
-	{% endif %}
-{% endif %}
 {% endfor%}
 </div>
 </div>

@@ -473,3 +473,109 @@ def po_validate(self,method):
 
 def add_preload_headers(response):
 	pass
+@frappe.whitelist()
+def get_category_item(item_group):
+	return frappe.db.sql(f"""
+			SELECT 
+				c.supplier_part_no,
+				I.item_name,I.item_code,I.image,I.sort_ord,I.unit_selling_price,I.valuation_rate,I.stock_uom,I.master_case_qty,I.unit_buying_price,I.case_qty,I.shelf_location,b.actual_qty
+			from 
+				`tabItem Supplier` as c
+				left join `tabItem` as I on I.name=c.parent
+				left join `tabBin` as b on I.name=b.item_code
+				where I.item_group = '{item_group}'
+				group by I.item_name
+			""",as_dict=1)
+
+# item_list=[{"item_code":"95177MT",'shelf_location':"1234","sote_ore": },{"item_code":"95177MdsdT",'shelf_location':"1234"}]
+@frappe.whitelist()
+def update_ietm_shelf_location(item_list):
+	item_list = json.loads(item_list)
+	for each in item_list:
+		if each.get('item_code'):
+			frappe.db.set_value("Item",each.get('item_code'),'shelf_location',each.get('shelf_location'))
+			frappe.db.set_value("Item",each.get('item_code'),'sort_ord',each.get('sort_ord') or 0)
+
+@frappe.whitelist()
+def get_item_group():
+	return frappe.get_all('Item Group', filters={'is_group': 0})
+
+
+@frappe.whitelist()
+def change_item_group(item_group,item):
+	item_list = json.loads(item)
+	for each_item in item_list:
+		doc = frappe.get_doc("Item",each_item)
+		doc.item_group=item_group
+		doc.save()
+
+@frappe.whitelist()
+def get_groupwise_items():
+	root_item = frappe.db.sql("""
+			SELECT name,parent_item_group, lft
+			FROM `tabItem Group`
+			ORDER BY lft
+			""",as_dict=1)
+	group_itmes= []
+	count = {'All Item Groups':0}
+	for group in root_item:
+		if group.parent_item_group in count:
+			count.update({group.name : count.get(group.parent_item_group) + 1})
+			group.count = count.get(group.parent_item_group) + 1
+			item = "&#160;"*group.count*2 + str(group.name)
+			group_itmes.append(item)
+		else:
+			count.update({group.name:0})
+	
+	return group_itmes
+	# item_group_map={}
+	# child_map={}
+	# child_items = frappe.db.get_values('Item Group', {'is_group': 0},['name','parent_item_group'],as_dict=1)
+	# for item in child_items:
+	# 	if item.parent_item_group in child_map.keys() and item.get('name'):
+	# 		child_map[item['parent_item_group']].append(item['name'])
+	# 	else:
+	# 		a=[]
+	# 		a.append(item.name)
+	# 		child_map[item.parent_item_group] = list(a)
+
+	# child_parent_items=frappe.db.sql("""
+	# 		SELECT name,parent_item_group
+	# 		FROM `tabItem Group`
+	# 		WHERE is_group=1 and NULLIF(parent_item_group,'') IS NOT NULL 
+	# 		""",as_dict=1)
+	# root_item = frappe.db.sql("""
+	# 		SELECT name,parent_item_group
+	# 		FROM `tabItem Group`
+	# 		WHERE is_group=1 and NULLIF(parent_item_group,'') IS NULL 
+	# 		""",as_dict=1)
+
+	# for each in root_item:
+	# 	item_group_map[each['name']]=[]
+		
+		
+
+
+
+
+
+
+# for each_child in child_parent_items:	
+# 	print(child_map[each_child['name']])
+# 	item_group_map[child_map[each_child['parent_item_group']]].append([child_map[each_child['name']]])
+
+# def get_child_nodes(item_group,item_group_map):
+# 	node=frappe.db.sql("""
+# 		SELECT name
+# 		FROM `tabItem Group`
+# 		WHERE is_group=1 and parent_item_group={}
+# 		""".format(each['name']),as_dict=1)
+
+@frappe.whitelist()
+def get_reorder_qty(item):
+	return frappe.db.get_value('Item Reorder', { "parent": item, "parenttype": "Item" }, 'warehouse_reorder_qty')
+
+@frappe.whitelist()
+def get_supplier_number(item):
+	return frappe.db.get_value('Item Supplier', {"parent": item,"parenttype": "Item" }, 'supplier_part_no')
+

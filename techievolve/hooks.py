@@ -17,7 +17,7 @@ app_license = "GPL 3.0"
 website_context = {
 	"splash_image": "/files/DK.png"
 }
-
+app_include_css = ["assets/css/tech.css","assets/techievolve/css/custom_report.css"]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/techievolve/css/techievolve.css"
 # app_include_js = "/assets/techievolve/js/techievolve.js"
@@ -32,7 +32,7 @@ app_include_html = "/assets/techievolve/js/techievolve.js"
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
-# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
+doctype_tree_js = {"Item Group" : "public/js/item_group_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 # Home Pages
@@ -104,6 +104,7 @@ doctype_js = {
 	"Stock Entry":"public/js/stock_entry.js",
 	"Material Request": "public/js/material_request.js",
 	"Customer": "public/js/customer.js",
+	"Item": "public/js/item.js"
 }
 doc_events = {
 	"Item":{
@@ -121,7 +122,9 @@ doc_events = {
 		"before_submit": "techievolve.techievolve.doc_events.delivery_note.before_submit"
 	},
 	"Purchase Order":{
-		"validate":"techievolve.api.po_validate"
+		"validate": "techievolve.techievolve.doc_events.purchase_order.validate",
+		"on_submit": "techievolve.techievolve.doc_events.purchase_order.on_submit",
+		"on_update_after_submit": "techievolve.techievolve.doc_events.purchase_order.on_update_after_submit",
 	},
 	"Purchase Receipt":{
 		"validate":"techievolve.techievolve.doc_events.purchase_receipt.validate"
@@ -176,7 +179,7 @@ render.add_preload_headers = my_add_preload_headers
 # }
 override_whitelisted_methods = {
 	"frappe.desk.search.search_link": "techievolve.api.search_link",
-	"erpnext.shopping_cart.cart.update_cart": "techievolve.api.update_cart"
+	#"erpnext.shopping_cart.cart.update_cart": "techievolve.api.update_cart"
 }
 #
 # each overriding function accepts a `data` argument;

@@ -7,7 +7,7 @@
 	<div class="col-md-12">
 		{% if cart_settings.show_price and product_info.price %}
 		<h4>
-			{{ product_info.price.formatted_price_sales_uom }}
+			$ {{  "{0:.2f}".format(frappe.db.get_value('Item',item_code,'unit_selling_price')) or product_info.price.formatted_price_sales_uom }}
 			<small class="text-muted">({{ product_info.price.formatted_price }} / {{ product_info.uom }})</small>
 		</h4>
 		{% endif %}
@@ -21,7 +21,7 @@
 			<span class="text-success">
 				{{ _('In stock') }}
 				{% if product_info.show_stock_qty and product_info.stock_qty %}
-					({{ product_info.stock_qty[0][0] }})
+					({{ product_info.stock_qty[0][0] | int }} Case)
 				{% endif %}
 			</span>
 			{% endif %}

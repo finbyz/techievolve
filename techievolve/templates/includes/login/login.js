@@ -179,14 +179,18 @@ login.login_handlers = (function() {
 				window.location.href = data.redirect_to;
 			} else if(data.message=="No App") {
 				login.set_indicator("{{ _("Success") }}", 'green');
+				
 				if(localStorage) {
-					var last_visited =
-						localStorage.getItem("last_visited")
-						|| frappe.utils.get_url_arg("redirect-to");
-					localStorage.removeItem("last_visited");
+					window.location.href = '/';
+					// var last_visited =
+					// 	localStorage.getItem("last_visited")
+					// 	|| frappe.utils.get_url_arg("redirect-to");
+					
+					// localStorage.removeItem("last_visited");
 				}
 
 				if(data.redirect_to) {
+					console.log(data.redirect_to)
 					window.location.href = data.redirect_to;
 				}
 

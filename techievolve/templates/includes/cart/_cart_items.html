@@ -34,7 +34,7 @@
         </div>
         <!-- button -->
         <div>
-            <button class="btn-remove"  data-item-code={{ d.item_code }} data-dir="remove" >Delete</button>
+            <button class="btn-remove"  data-item-code={{ d.item_code }} data-dir="remove" >X</button>
         </div>
     </td>
     {% if cart_settings.enable_checkout %}
@@ -52,15 +52,6 @@
 <script>
      $(".cart-items .btn-remove").on('click', function () {
         item_code = $(this).attr("data-item-code");
-        const remove_item = () => {
-            shopping_cart.shopping_cart_update({item_code, qty: 0});
-        }
-        frappe.confirm(__("Remove Item {0} from cart?", [item_code]), remove_item);
+        shopping_cart.shopping_cart_update({item_code, qty: 0});
     })
-    function handle_save_fail(btn, on_error) {
-		$(btn).prop('disabled', false);
-		if (on_error) {
-			on_error();
-		}
-	}
 </script>

@@ -40,11 +40,11 @@
                 <table class="table table-bordered mt-3">
                     <thead>
                         <tr>
-                            <th width="35%">{{ _('Image') }}</th>
-                            <th width="20%">{{ _('Item') }}</th>
+                            <th width="16%">{{ _('Image') }}</th>
+                            <th width="35%">{{ _('Item') }}</th>
                             <th width="10%">{{ _('Price') }}</th>
                             <th width="10%">{{ _('Case Qty') }}</th>
-                            <th width="15%" class="text-right">{{ _('Quantity') }}</th>
+                            <th width="19%" class="text-right">{{ _('Quantity') }}</th>
                             <th width="20%" class="text-right">{{ _('Subtotal') }}</th>
                         </tr>
                     </thead>
@@ -53,7 +53,7 @@
                         {% endif %}
                         <!--  loop first end -->
                         
-                        {% include "templates/pages/category_items.html" %}
+                        {% include "templates/pages/item_cart.html" %}
 
                         {% endif %}
                         <!--  item group condition end -->

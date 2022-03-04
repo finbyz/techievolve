@@ -1,15 +1,24 @@
-
 <tr>
-    <td width="20%" data-item-code={{item.item_code}}><a href="/{{item.route}}"><img
-                src="{{ item.website_image or item.image }}" alt="{{ item.name }}"></a></td>
-    <td width="35%">
+    <td width="35%" data-item-code={{item.item_code}}><img class="website-image website-image-{{item.item_code}}"
+                src="{{ item.website_image or item.image }}" alt="{{ item.name }}"></td>
+    <p class="image-zoom-view image-zoom-view-{{item.item_code}}" style="display: none;">
+        <button type="button" class="close" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </p>
+    <td width="20%">
         <span class="item-name-{{item.item_code}}">{{ item.item_name }}</span>
-        <br>
-        <span class="item-description-{{item.item_code}}">{{ item.description }}</span>
+        <!--<br>
+        <span class="item-description-{{item.item_code}}">{{ item.description }}</span>-->
         <span class="item-uom-{{item.item_code}}">{{ item.stock_uom }}</span>
         {% if item.is_stock_item%}
         <br>
-        <span>Available in Stock: {{item.stock_qty[0][0] | int or 0}}</span>
+        {% set stock_qty = item.stock_qty[0][0] %}
+        <span>Stock: {{stock_qty | int  or 0}} Case</span>      
         {% endif %}
     </td>
     <td width="10%" class="rate-{{item.item_code}}" align="right">$ {{ "{0:.2f}".format(frappe.db.get_value('Item',item.item_code,'unit_selling_price')) or ("{0:.2f}".format(item.price/frappe.db.get_value('Item',item.item_code,'case_qty'))) }}</td>
@@ -125,17 +134,70 @@
 
     }
 
-    // frappe.ready(() => {
-    //     $('.page_content').on('click', '.btn-add-to-cart-{{ item.item_code }}', (e) => {
+    
+    var $zoom_wrapper = $('.image-zoom-view-{{ item.item_code }}');
+    $('.website-image-{{ item.item_code }}').on('click', (e) => {
+        hide_preview();
+        e.preventDefault();
+        var $img = $(e.target);
+        var src = $img.prop('src');
+        if (!src) return;
+        show_preview(src);
+    });
 
-    //         const $btn = $(e.currentTarget);
+    $zoom_wrapper.on('click', 'button', hide_preview);
 
-    //         $btn.prop('disabled', true);
+    $(document).on('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hide_preview();
+        }
+    });
 
-    //         const item_code = $btn.data('item.item-code');
-    //         $('cart-items-custom tr td:first-child').addClass('test')
-            
-    //     });
-    // });
+    function show_preview(src) {
+        $zoom_wrapper.show();
+        const $img = $(`<img src="${src}">`)
+        $zoom_wrapper.append($img);
+    }
+
+    function hide_preview() {
+        $zoom_wrapper.find('img').remove();
+        $zoom_wrapper.hide();
+    }
 </script>
 {% endblock %}
+<style>
+	.website-image {
+		cursor: pointer;
+	}
+
+	.image-zoom-view {
+		position: fixed!important;
+		top: 0!important;
+		left: 0!important;
+		right: 0!important;
+		bottom: 0!important;
+		height: 100vh;
+		width: 100vw;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background: rgba(0, 0, 0, 0.8);
+		z-index: 1080;
+	}
+
+	.image-zoom-view img {
+		max-height: 100%;
+		max-width: 100%;
+	}
+
+	.image-zoom-view button {
+		position: absolute;
+		right: 3rem;
+		top: 2rem;
+	}
+
+	.image-zoom-view svg {
+		color: var(--white);
+	}
+</style>
+</style>

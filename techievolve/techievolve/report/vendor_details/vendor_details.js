@@ -3,29 +3,27 @@
 /* eslint-disable */
 
 frappe.query_reports["Vendor Details"] = {
-	"filters": [
-		{
-			"fieldname":"supplier",
-			"label": __("Supplier"),
-			"fieldtype": "Link",
-			"options": "Supplier"
-		}
-	]
+    "filters": [{
+        "fieldname": "supplier",
+        "label": __("Supplier"),
+        "fieldtype": "Link",
+        "options": "Supplier"
+    }]
 };
 
 
-function new_purchase_order(supplier,items){
-	frappe.call({
-		method:"techievolve.techievolve.report.vendor_details.vendor_details.add_item_details",
-		args:{
-			'supplier':supplier
-		},
-		freeze:true,
-		freeze_message:"Creating Purchase Order",
-		callback: function(r){
-			if (r.message){
-				frappe.set_route("Form","Purchase Order",r.message)
-			}
-		}
-	})
+function new_purchase_order(supplier, items) {
+    frappe.call({
+        method: "techievolve.techievolve.report.vendor_details.vendor_details.add_item_details",
+        args: {
+            'supplier': supplier
+        },
+        freeze: true,
+        freeze_message: "Creating Purchase Order",
+        callback: function(r) {
+            if (r.message) {
+                frappe.set_route("Form", "Purchase Order", r.message)
+            }
+        }
+    })
 }

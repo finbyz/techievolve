@@ -1,5 +1,5 @@
 import frappe
-
+from frappe.utils import flt
 def before_validate(self, method):
 	if not self.uoms:
 		self.uoms = []
@@ -53,7 +53,12 @@ def validate(self,method):
 		self.supplier = frappe.db.get_value("Item Supplier",{'parent':self.name},"supplier")
 	else:
 		self.supplier = ""
+	calculate_buying_price(self)
 
+def calculate_buying_price(self):
+	if self.unit_buying_price and self.case_qty and flt(self.unit_buying_price * self.case_qty) != flt(self.buying_price):
+		self.buying_price = flt(self.unit_buying_price * self.case_qty)
+		
 def on_update(self,method):
 	create_item_price(self)
 

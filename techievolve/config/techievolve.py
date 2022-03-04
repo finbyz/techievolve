@@ -13,7 +13,27 @@ def get_data():
 				},
 			]
 		},
-		
+		{
+			"label": _("Category"),
+			"items": [	
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "fa fa-sitemap",
+					"label": _("Category"),
+					"link": "Tree/Item Group",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "fa fa-sitemap",
+					"label": _("Category Item List"),
+					"link": "group-item-list?item_group=Adhesive Foam Sheets",
+					"onboard": 1,
+				},
+			]
+		},
 		{
 			"label": _("Reports"),
 			"items": [

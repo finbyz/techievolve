@@ -1,0 +1,9 @@
+div[data-page-route='query-report'] .dt-row {
+    top: auto!important;
+    height: auto!important;
+    position: relative!important;
+}
+
+.dt-instance-1 .dt-cell {
+    height: auto!important;
+}

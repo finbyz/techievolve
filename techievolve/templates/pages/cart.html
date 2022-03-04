@@ -2,7 +2,7 @@
 
 {% block title %} {{ _("Shopping Cart") }} {% endblock %}
 
-{% block header %}<h1>{{ _("Shopping Cart") }}</h1>{% endblock %}
+{% block header %}<h1 >{{ _("Shopping Cart") }}</h1>{% endblock %}
 
 <!--
 {% block script %}
@@ -20,7 +20,32 @@
 
 <div class="cart-container">
 	<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
-
+	{% if doc.items %}
+		<div class="place-order-container">
+			<span style="margin-right: 10px;">
+				{% if cart_settings.enable_checkout %}
+			<b>{{ _("Grand Total") }}
+			{% if doc.doctype == 'Quotation' %}
+			{% set grand_total = [] %}
+			{%- for item in doc.items -%}
+			{% if grand_total.append(item.rate * item.qty) %}{% endif %}
+			 {% endfor %}
+			 {{ frappe.utils.fmt_money((grand_total | sum),currency=doc.currency) }}
+			{% else %}
+			{{ doc.get_formatted("grand_total") }}
+			{% endif %}
+		</b>
+		</span>
+				<button class="btn btn-primary btn-place-order_" type="button">
+					{{ _("Place Order") }}
+				</button>
+			{% else %}
+				<button class="btn btn-primary btn-request-for-quotation" type="button">
+					{{ _("Request for Quotation") }}
+				</button>
+			{% endif %}
+		</div>
+	{% endif %}
 	{% if doc.items %}
 	<table class="table table-bordered mt-3">
 		<thead>

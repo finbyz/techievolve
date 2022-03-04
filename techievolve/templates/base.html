@@ -76,10 +76,12 @@
     {% endblock %}
 </div>
 <div style="clear: both;"></div>
-    {%- block footer -%}
-    {% include "templates/includes/footer/footer.html" %}
-    {%- endblock -%}
 
+    {% if name == "home"%}
+        {%- block footer -%}
+        {% include "templates/includes/footer/footer.html" %}
+        {%- endblock -%}
+    {% endif %}
     {% block base_scripts %}
     <!-- js should be loaded in body! -->
     
