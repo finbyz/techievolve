@@ -35,7 +35,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if filters.get('supplier'):
 		where_condition =  "and tabItem.name in (select parent from `tabItem Supplier` where supplier = '{}')".format(filters.get('supplier'))
 
-	items = frappe.db.sql("""select tabItem.name, tabItem.image,bin.actual_qty,
+	items = frappe.db.sql("""select tabItem.name, tabItem.image, bin.actual_qty,
 		tabItem.case_qty, tabItem.master_case_qty,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
@@ -61,6 +61,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
 			tabItem.idx desc,
 			tabItem.name, item_name
+			limit %(start)s, %(page_len)s 
 		 """.format(
 			columns=columns,
 			where_condition = where_condition,
@@ -75,7 +76,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				"start": start,
 				"page_len": page_len
 			}, as_list=True)
-
 	if items:
 		for item in items:
 			if item[1]:
@@ -117,7 +117,8 @@ def item_query_custom(doctype, txt, searchfield, start, page_len, filters, as_di
 		where_condition =  "and tabItem.name in (select parent from `tabItem Supplier` where supplier = '{}')".format(filters.get('supplier'))
 	
 	if filters.get('item_code'):
-		where_condition += " and tabItem.name not in {}".format("(" + ", ".join([f'"{l}"' for l in filters.get('item_code')[-1]]) + ")")
+		if filters.get('item_code')[-1]:
+			where_condition += " and tabItem.name not in {}".format("(" + ", ".join([f'"{l}"' for l in filters.get('item_code')[-1]]) + ")")
 
 	items = frappe.db.sql("""select tabItem.name, tabItem.image,bin.actual_qty,
 		tabItem.case_qty, tabItem.master_case_qty,
@@ -134,7 +135,7 @@ def item_query_custom(doctype, txt, searchfield, start, page_len, filters, as_di
 
 		where tabItem.docstatus < 2
 			and tabItem.has_variants=0
-			and tabItem.disabled=0
+			and tabItem.disabled=0 and tabItem.discontinued=0
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			{where_condition}
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)

@@ -5,8 +5,16 @@ from frappe import _
 from six import string_types
 #from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier
 
+def validate(self,method):
+	sort_items(self)
+	
 def on_submit(self,method):
 	create_po(self)
+
+def sort_items(self):
+	self.items = sorted(self.items,key=lambda x:x.get('shelf_location') or 'z')
+	for idx, data in enumerate(self.items,start=1):
+		data.idx = idx
 
 def create_po(self):
 	selected_items =  [row for row in self.items if frappe.db.get_value("Item",row.item_code,'delivered_by_supplier')]

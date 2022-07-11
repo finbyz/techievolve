@@ -25,15 +25,18 @@
 			<span style="margin-right: 10px;">
 				{% if cart_settings.enable_checkout %}
 			<b>{{ _("Grand Total") }}
+			<span id="grand_total_amount">
 			{% if doc.doctype == 'Quotation' %}
 			{% set grand_total = [] %}
 			{%- for item in doc.items -%}
+			
 			{% if grand_total.append(item.rate * item.qty) %}{% endif %}
 			 {% endfor %}
 			 {{ frappe.utils.fmt_money((grand_total | sum),currency=doc.currency) }}
 			{% else %}
 			{{ doc.get_formatted("grand_total") }}
 			{% endif %}
+			</span>
 		</b>
 		</span>
 				<button class="btn btn-primary btn-place-order_" type="button">

@@ -31,7 +31,7 @@ app_include_html = "/assets/techievolve/js/techievolve.js"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"Sales Order" : "public/js/sales_order_list.js"}
 doctype_tree_js = {"Item Group" : "public/js/item_group_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -104,7 +104,7 @@ doctype_js = {
 	"Stock Entry":"public/js/stock_entry.js",
 	"Material Request": "public/js/material_request.js",
 	"Customer": "public/js/customer.js",
-	"Item": "public/js/item.js"
+	"Item": "public/js/item.js",
 }
 doc_events = {
 	"Item":{
@@ -129,7 +129,11 @@ doc_events = {
 	"Purchase Receipt":{
 		"validate":"techievolve.techievolve.doc_events.purchase_receipt.validate"
 	},
+	"Purchase Invoice":{
+		"validate":"techievolve.techievolve.doc_events.purchase_invoice.validate"
+	},
 	"Sales Order":{
+		'validate': 'techievolve.techievolve.doc_events.sales_order.validate',
 		"on_submit": "techievolve.techievolve.doc_events.sales_order.on_submit"
 	}
 }

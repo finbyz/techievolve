@@ -25,6 +25,19 @@ frappe.ui.form.LinkSelector = Class.extend({
             title: __("Select {0}", [(this.doctype == '[Select]') ? __("value") : __(this.doctype)]),
             fields: [{
                     fieldtype: "Button",
+                    fieldname: "select_all",
+                    label: __("Select All"),
+                    click: () => {
+                        me.select_all(me);
+                    }
+                },
+                { fieldtype: "Column Break" },
+                { fieldtype: "Column Break" },
+                { fieldtype: "Column Break" },
+                { fieldtype: "Column Break" },
+                { fieldtype: "Column Break" },
+                {
+                    fieldtype: "Button",
                     fieldname: "update_items",
                     label: __("Add Items"),
                     click: () => {
@@ -32,15 +45,8 @@ frappe.ui.form.LinkSelector = Class.extend({
                         me.dialog.hide();
                     },
                 },
-                // { fieldtype: "Column Break" },
-                {
-                    fieldtype: "Button",
-                    fieldname: "select_all",
-                    label: __("Select All"),
-                    click: () => {
-                        me.select_all(me);
-                    }
-                },
+
+                { fieldtype: "Section Break" },
                 {
                     fieldtype: "Data",
                     fieldname: "txt",
@@ -82,27 +88,30 @@ frappe.ui.form.LinkSelector = Class.extend({
 
     },
     select_all: function(frm) {
-        var $checkboxes = $(' #get_item_name').find(':checkbox')
-        $checkboxes.prop('checked', ':checked')
-
+        var $checkboxes = $(' #get_item_name').find(':checkbox');
+        $checkboxes.attr("checked", true);
     },
     update_items: function(frm) {
         var me = this;
         var updated = false;
         var d = null;
         var selected = new Array();
+        selected = [];
+
 
         $('#get_item_name input:checked').each(function() {
-            selected.push(this);
+            if (selected.indexOf(this.id) === -1) {
+                selected.push(this.id);
+            }
         })
 
         $.each(me.target.frm.doc['items'] || [], function(i, d) {
             selected.forEach((item, i) => {
-                if (d[me.fieldname] === item.id) {
+                if (d[me.fieldname] === item) {
                     frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, i);
                     $(".pro-qty-" + d.item_code).each(function() { $(this).text(i) });
                     $(".pro-qty-" + d.item_code).each(function() { $(this).closest('span[class^="text-muted"]').addClass("highlighted") });
-                    frappe.show_alert(__("Added {0} ({1})", [item.id, d[me.qty_fieldname]]));
+                    frappe.show_alert(__("Added {0}", [item]));
                     updated = true;
                     return false;
                 }
@@ -111,31 +120,52 @@ frappe.ui.form.LinkSelector = Class.extend({
         if (!updated) {
             selected.forEach((item, i) => {
                 d = me.target.add_new_row();
-                var qty = $(item).attr('data-qty');
-                frappe.model.set_value(d.doctype, d.name, me.fieldname, item.id);
+                var qty = $(`${item}`).attr('data-qty');
+                frappe.model.set_value(d.doctype, d.name, me.fieldname, item);
+                frappe.model.set_value(d.doctype, d.name, "desctiption", "test");
                 frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, qty);
                 frappe.model.set_value(d.doctype, d.name, 'reorder_qty', qty);
 
                 frappe.run_serially([
                     () => frappe.timeout(0.1),
                     () => frappe.timeout(0.5),
-                    () => frappe.show_alert(__("Added {0} ({1})", [item.id, qty])),
+                    () => frappe.show_alert(__("Added {0}", [item])),
                     () => $(".pro-qty-" + d.item_code).each(function() { $(this).text(qty) }),
                     () => $(".pro-qty-" + d.item_code).each(function() { $(this).closest('span[class^="text-muted"]').addClass("highlighted") })
                 ]);
-                item.checked = false
+
+                $(`#${item}`).attr("checked", false)
             })
         } else if (me.dynamic_link_field) {
+            console.log('2')
             var d = me.target.add_new_row();
             frappe.model.set_value(d.doctype, d.name, me.dynamic_link_field, me.dynamic_link_reference);
             frappe.model.set_value(d.doctype, d.name, me.fieldname, value);
             frappe.show_alert(__("{0} {1} added", [me.dynamic_link_reference, value]));
         } else {
-            var d = me.target.add_new_row();
-            frappe.model.set_value(d.doctype, d.name, me.fieldname, value);
-            frappe.show_alert(__("{0} added", [value]));
-        }
+            // var d = me.target.add_new_row();
+            // frappe.model.set_value(d.doctype, d.name, me.fieldname, value);
+            // frappe.show_alert(__("{0} added", [value]));
+            console.log('3')
+            selected.forEach((item, i) => {
+                d = me.target.add_new_row();
+                var qty = $(`${item}`).attr('data-qty');
+                console.log(item)
+                frappe.model.set_value(d.doctype, d.name, me.fieldname, item);
+                frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, qty);
+                frappe.model.set_value(d.doctype, d.name, 'reorder_qty', qty);
 
+                frappe.run_serially([
+                    () => frappe.timeout(0.1),
+                    () => frappe.timeout(0.5),
+                    () => frappe.show_alert(__("Added {0}", [item, qty])),
+                    () => $(".pro-qty-" + d.item_code).each(function() { $(this).text(qty) }),
+                    () => $(".pro-qty-" + d.item_code).each(function() { $(this).closest('span[class^="text-muted"]').addClass("highlighted") })
+                ]);
+                $(`#${item}`).attr("checked", false)
+            })
+        }
+        $('#get_item_name input').attr('checked', false)
     },
 
     search: function() {
@@ -160,7 +190,6 @@ frappe.ui.form.LinkSelector = Class.extend({
                 this.target.fieldinfo[this.fieldname].get_query(cur_frm.doc));
         }
 
-        // console.log(cur_frm.doc.supplier)
         args['filters'] = { "item_code": ['!=', item_list], "supplier": cur_frm.doc.supplier }
             // args['filters'] = { "item_code": ['!=', item_list] }
         args['page_length'] = 20
@@ -267,7 +296,7 @@ frappe.ui.form.LinkSelector = Class.extend({
                         frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, re_order_qty);
                         $(".pro-qty-" + d.item_code).each(function() { $(this).text(data.qty) });
                         $(".pro-qty-" + d.item_code).each(function() { $(this).closest('span[class^="text-muted"]').addClass("highlighted") });
-                        frappe.show_alert(__("Added {0} ({1})", [value, d[me.qty_fieldname]]));
+                        frappe.show_alert(__("Added {0}", [value]));
                         updated = true;
                         return false;
                     }
@@ -283,7 +312,7 @@ frappe.ui.form.LinkSelector = Class.extend({
                         () => {
                             frappe.model.set_value(d.doctype, d.name, me.qty_fieldname, re_order_qty)
                         },
-                        () => frappe.show_alert(__("Added {0} ({1})", [value, data.qty])),
+                        () => frappe.show_alert(__("Added {0}", [value])),
                         () => $(".pro-qty-" + d.item_code).each(function() { $(this).text(data.qty) }),
                         () => $(".pro-qty-" + d.item_code).each(function() { $(this).closest('span[class^="text-muted"]').addClass("highlighted") })
                     ]);
@@ -292,11 +321,13 @@ frappe.ui.form.LinkSelector = Class.extend({
 
             }, __("Set Quantity"), __("Set"));
         } else if (me.dynamic_link_field) {
+
             var d = me.target.add_new_row();
             frappe.model.set_value(d.doctype, d.name, me.dynamic_link_field, me.dynamic_link_reference);
             frappe.model.set_value(d.doctype, d.name, me.fieldname, value);
             frappe.show_alert(__("{0} {1} added", [me.dynamic_link_reference, value]));
         } else {
+
             var d = me.target.add_new_row();
             frappe.model.set_value(d.doctype, d.name, me.fieldname, value);
             frappe.show_alert(__("{0} added", [value]));

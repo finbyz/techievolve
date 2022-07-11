@@ -92,6 +92,7 @@
 		{{ _("Grand Total") }}
 	</th>
 	<th class="text-right">
+        <span id="grand_total">
         {% if doc.doctype == 'Quotation' %}
         {% set grand_total = [] %}
         {%- for item in doc.items -%}
@@ -101,5 +102,6 @@
         {% else %}
 		{{ doc.get_formatted("grand_total") }}
         {% endif %}
+    </span>
 	</th>
 </tr>

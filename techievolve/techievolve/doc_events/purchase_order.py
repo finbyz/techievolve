@@ -13,6 +13,12 @@ def validate(self,method):
 		if not item.reorder_qty:
 			item.reorder_qty = flt(reorder_details.warehouse_reorder_qty)
 
+		if item.warehouse:
+			item.actual_stock_qty = flt(frappe.db.get_value("Bin", {"item_code": item.item_code, "warehouse": item.warehouse}, "actual_qty"))
+
+		if item.unit_buying_price:
+			item.rate = flt(item.unit_buying_price * item.case_qty)
+
 def on_submit(self,method):
 	update_reorder_details(self)
 

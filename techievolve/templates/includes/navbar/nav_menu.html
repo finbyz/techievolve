@@ -1,129 +1,165 @@
-{% set parent_item_group = frappe.get_all("Item Group",{'parent_item_group':'All Item Groups','show_in_website':1}, order_by="weightage") %}
-{% set data = {} %}
-
-{% for item_group in parent_item_group %}
-{% set _ = data.update({item_group.name:frappe.get_all('Item Group',{'parent_item_group':item_group.name})}) %}
+{% set parent_item_group = frappe.get_all("Item Group",{'parent_item_group':'All Item Groups','show_in_website':1}, order_by="weightage") %} 
+{% set data = {} %} 
+{% for item_group in parent_item_group %} 
+{% set _ = data.update({item_group.name:frappe.get_all('Item Group',{'parent_item_group':item_group.name})}) %} 
 {% endfor%}
 
 <div class="page-header">
-<div class="dollar-king-menu">
-<div class="left-panel-menu">      
-<!-- menu -->
-<div id="MainMenu">
-	
-	{% set role_list = [] %}
-	{% for role in frappe.get_doc("User",frappe.session.user).roles %}
-	{% set _ =  role_list.append(role.role) %}
-	{% endfor %}
-<div class="list-group panel">
-{% for key, value in data.items() %}
-{% set parent_doc = frappe.get_doc("Item Group",key)%}
-{% if parent_doc.name != "Dollar King Plus"%}
-<div>
-<a href="#{{ parent_doc.name|replace(' ','') }}" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">{{ parent_doc.name }}  <i class="fa fa-caret-down"></i></a>
-<div class="collapse" id="{{ parent_doc.name|replace(' ','') }}">
-{% for v in value %}
-{% set child_doc = frappe.get_doc("Item Group",v['name']) %} 	
-{% if child_doc.name == name %}
-<a href="/{{child_doc.route}}" class="list-group-item current">{{ child_doc.name }}</a>
-{% else %}
-<a href="/{{child_doc.route}}" class="list-group-item">{{ child_doc.name }}</a>
-{% endif %}
+    <div class="dollar-king-menu">
+        <div class="left-panel-menu">
+            <!-- menu -->
+            <div id="MainMenu">
 
-{% endfor %}
-</div>
-</div>
-{% else %}
-	{% if "DK Plus" in role_list %}
-	<div>
-		<a href="#{{ parent_doc.name|replace(' ','') }}" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">{{ parent_doc.name }}  <i class="fa fa-caret-down"></i></a>
-		<div class="collapse" id="{{ parent_doc.name|replace(' ','') }}">
-		{% for v in value %}
-			{% set child_doc = frappe.get_doc("Item Group",v['name']) %} 	
-			{% if child_doc.name == name %}
-			<a href="/{{child_doc.route}}" class="list-group-item current">{{ child_doc.name }}</a>
-			{% else %}
-			<a href="/{{child_doc.route}}" class="list-group-item">{{ child_doc.name }}</a>
-			{% endif %}
-		{% endfor %}
-		</div>
-	</div>
-	{% endif %}
-{% endif %}
-{% endfor%}
-</div>
-</div>
-</div>
-</div>
+                {% set role_list = [] %} 
+                {% for role in frappe.get_doc("User",frappe.session.user).roles %} 
+                {% set _ = role_list.append(role.role) %} 
+                {% endfor %}
+                <div class="list-group panel">
+                    {% for key, value in data.items() %} 
+                        {% set parent_doc = frappe.get_doc("Item Group",key)%} 
+                        {% if parent_doc.name != "Dollar King Plus"%}
+                        <div>
+                            <a href="#{{ parent_doc.name|replace(' ','') }}" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">{{ parent_doc.name }}  <i class="fa fa-caret-down"></i></a>
+                            <div class="collapse" id="{{ parent_doc.name|replace(' ','') }}">
+                                {% for v in value %} 
+                                    {% set child_doc = frappe.get_doc("Item Group",v['name']) %} 
+                                    {% set child_parent_item_groups = frappe.get_all("Item Group",{'parent_item_group':child_doc.name,'show_in_website':1}, order_by="weightage") %}
+                                        {% if child_doc.name == name %}
+                                            <a href="/{{child_doc.route}}" class="list-group-item current {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} has_subcategory {% endif %}" {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} data-toggle="collapse" data-parent="#{{ child_doc.name|replace(' ','') }}" {% endif %} > 
+                                                {{ child_doc.name }}
+                                                {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} 
+                                                <i class="fa fa-caret-down selected_dwn" style="float: right;" data-id="{{ child_doc.name|replace(' ','') }}"></i>
+                                                {% endif %}
+                                            </a> 
+                                            {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} 
+                                                <div class="collapse" id="{{ child_doc.name|replace(' ','') }}">
+                                                    {% for child_group in child_parent_item_groups %} 
+                                                    {% if child_group.name == name %}
+                                                    <a href="/{{ frappe.db.get_value("Item Group",{"name":child_group.name},'route') }}" class="list-group-item current_child">{{ child_group.name }}</a> 
+                                                    {% else %}
+                                                    <a href="/{{ frappe.db.get_value("Item Group",{"name":child_group.name},'route') }}" class="list-group-item">{{ child_group.name }}</a> 
+                                                    {% endif %} 
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        {% else %} 
+                                            {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} 
+                                                <a href="#{{ child_doc.name|replace(' ','') }}" class="list-group-item has_subcategory {{ child_doc.name|replace(' ','') }}" data-toggle="collapse" data-parent="#{{ child_doc.name|replace(' ','') }}" >{{ child_doc.name }}  
+                                                    <i class="fa fa-caret-down" style="float: right;"></i>
+                                                </a>
+                                                <div class="collapse" id="{{ child_doc.name|replace(' ','') }}">
+                                                    {% for child_group in child_parent_item_groups %} 
+                                                    {% if child_group.name == name %}
+                                                    <a href="/{{ frappe.db.get_value("Item Group",{"name":child_group.name},'route') }}" class="list-group-item current_child">{{ child_group.name }}</a> 
+                                                    {% else %}
+                                                    <a href="/{{ frappe.db.get_value("Item Group",{"name":child_group.name},'route') }}" class="list-group-item">{{ child_group.name }}</a> 
+                                                    {% endif %} 
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <a href="/{{child_doc.route}}" class="list-group-item">{{ child_doc.name }}</a> 
+                                            {% endif %}
+                                                <!-- <a href="/{{child_doc.route}}" class="list-group-item {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} has_subcategory {% endif %} {% if frappe.session.user == "Administrator" %} d-none {% endif %}" >{{ child_doc.name }}</a> -->
+                                        {% endif %} 
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %} {% if "DK Plus" in role_list %}
+                    <div>
+                        <a href="#{{ parent_doc.name|replace(' ','') }}" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">{{ parent_doc.name }}  <i class="fa fa-caret-down"></i></a>
+                        <div class="collapse" id="{{ parent_doc.name|replace(' ','') }}">
+                            {% for v in value %} 
+                            {% set child_doc = frappe.get_doc("Item Group",v['name']) %} 
+                            {% if child_doc.name == name %}
+                            <a href="/{{child_doc.route}}" class="list-group-item current {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} has_subcategory {% endif %}">{{ child_doc.name }}</a> 
+                            {% else %}
+                            <a href="/{{child_doc.route}}" class="list-group-item {% if frappe.db.get_value("Item Group",v['name'],"is_group") %} has_subcategory {% endif %}">{{ child_doc.name }}</a> 
+                            {% endif %} 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %} 
+                    {% endif %} 
+                    {% endfor%}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     $(document).ready(function($) {
-		var visitedUrl = $.cookie('visited') ? $.cookie('visited').split(",") : [];
-		
-		$("#MainMenu a").each(function(){
-			if(visitedUrl.includes(this.href)){
-			   $(this).css("color","Red");
-			}
-		});
-		
-		var currentUrl = window.location.href;
-        
-		if(!visitedUrl.includes(currentUrl))
-        {
-		   	visitedUrl.push(currentUrl);
-			var string = visitedUrl.join(",");
-            
+        var visitedUrl = $.cookie('visited') ? $.cookie('visited').split(",") : [];
+
+        $("#MainMenu a").each(function() {
+            if (visitedUrl.includes(this.href)) {
+                $(this).css("color", "Red");
+            }
+        });
+
+        var currentUrl = window.location.href;
+
+        if (!visitedUrl.includes(currentUrl)) {
+            visitedUrl.push(currentUrl);
+            var string = visitedUrl.join(",");
+
             var date = new Date();
             var minutes = 21600;
             date.setTime(date.getTime() + (minutes * 60 * 1000));
-            
-			$.cookie('visited', string, {expires: date, path:'/', secure: true});
-		}
+
+            $.cookie('visited', string, {
+                expires: date,
+                path: '/',
+                secure: true
+            });
+        }
     });
 </script>
 <script>
     $(document).ready(function() {
-		$('.top-cat li a').hover(function() {
-			let id = $(this).attr('id');
-			$('.child-cat .subcat-inner').each(function() {
-				$(this).removeClass('active');
-			});
-			$('.top-label a').each(function() {
-				$(this).removeClass('activeP');
-			});
-			$(`#${id}`).addClass('activeP');
-			$(`#child${id}`).addClass('active');
-		}, function() {
-			if ($('.child-cat').hasClass('active')) {} else {
-				$(`#${id}`).removeClass('activeP');
-				$(`#child${id}`).removeClass('active');
-			}
-		});
-        
+        $('.top-cat li a').hover(function() {
+            let id = $(this).attr('id');
+            $('.child-cat .subcat-inner').each(function() {
+                $(this).removeClass('active');
+            });
+            $('.top-label a').each(function() {
+                $(this).removeClass('activeP');
+            });
+            $(`#${id}`).addClass('activeP');
+            $(`#child${id}`).addClass('active');
+        }, function() {
+            if ($('.child-cat').hasClass('active')) {} else {
+                $(`#${id}`).removeClass('activeP');
+                $(`#child${id}`).removeClass('active');
+            }
+        });
+        $(".current_child").parent().parent().parent().children('.list-group-item-success').trigger("click");
+        // get id of current selected element
+        var cuurent_child_id = $(".current_child").parent().attr('id')
+        $(`.${cuurent_child_id}`).trigger("click");
+        // $(".current_child").parent().parent().children('.has_subcategory').trigger("click");
         $(".current").parent().parent().children('.list-group-item-success').trigger("click");
+        $('.has_subcategory').on("click",(e)=>{
+            let origin = location.origin;
+            if(e.target.innerText){
+                frappe.model.get_value("Item Group",e.target.innerText,'route',(res)=>{
+                    if(res.route){
+                        window.location.href = `${origin}/${res.route}`;
+                    }
+                }) 
+            }
+        })
+        $('.selected_dwn').on('click',(e)=>{
+            let clicked_id = $(e.target).data('id');
+            $(`#${clicked_id}`).toggleClass('show')
+        })
     });
 </script>
 <script>
-$(document).ready(function() {
-	$(".shop-cat-head i").click(function(){
-		$(".left-panel-menu").slideToggle();
-		$( this ).toggleClass( "fa-chevron-up fa-chevron-down" );
-	});	
-});
+    $(document).ready(function() {
+        $(".shop-cat-head i").click(function() {
+            $(".left-panel-menu").slideToggle();
+            $(this).toggleClass("fa-chevron-up fa-chevron-down");
+        });
+    });
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

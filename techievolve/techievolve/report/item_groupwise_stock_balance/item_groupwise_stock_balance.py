@@ -7,7 +7,6 @@ import functools
 from past.builtins import cmp
 from frappe import _
 from frappe.utils import flt
-# import frappe
 
 def execute(filters=None):
 	columns, data = [], []
@@ -278,7 +277,7 @@ def create_stock_entry(warehouse,supplier,item_code,balance_qty,buying_unit_pric
 		})
 		se.save()
 		se.submit()
-		return se.name
+
 	elif float(balance_qty) < float(new_qty):
 		se_qty = abs(float(balance_qty) - float(new_qty))
 		se = frappe.new_doc("Stock Entry")
@@ -293,4 +292,7 @@ def create_stock_entry(warehouse,supplier,item_code,balance_qty,buying_unit_pric
 		})
 		se.save()
 		se.submit()
-		return se.name
+
+	stock_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+	frappe.db.set_value("Item", item_code, "stock_qty",flt(stock_qty) or 0)	
+	return se.name

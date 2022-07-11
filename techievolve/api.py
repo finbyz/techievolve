@@ -6,6 +6,7 @@ from frappe.utils import flt,cstr, unique, cint
 from frappe import _
 from erpnext.shopping_cart.cart import _get_cart_quotation, get_cart_quotation, apply_cart_settings, get_shopping_cart_menu
 from erpnext.stock.utils import get_incoming_rate
+from frappe.client import get_password
 
 @frappe.whitelist()
 def update_cart_custom(item_data=[],ignore_permissions=True):
@@ -473,21 +474,33 @@ def po_validate(self,method):
 
 def add_preload_headers(response):
 	pass
+
 @frappe.whitelist()
-def get_category_item(item_group):
+def get_category_item(item_group, discontinued=0, search_box_data=None):
+	conditions = ""
+	
+	conditions += f" and I.discontinued = '{discontinued}'"
+
+	if search_box_data:
+		conditions += f" and (I.item_name LIKE '%{search_box_data}%' or I.item_code LIKE '%{search_box_data}%' or c.supplier_part_no LIKE '%{search_box_data}%')"
+
+	if discontinued not in [1,"1",True]:
+		conditions += f" and I.item_group = '{item_group}'"
+	
 	return frappe.db.sql(f"""
 			SELECT 
 				c.supplier_part_no,
-				I.item_name,I.item_code,I.image,I.sort_ord,I.unit_selling_price,I.valuation_rate,I.stock_uom,I.master_case_qty,I.unit_buying_price,I.case_qty,I.shelf_location,b.actual_qty
+				I.item_name,I.item_code,I.image,I.sort_ord,I.unit_selling_price,I.disabled,
+				I.valuation_rate,I.stock_uom,I.master_case_qty,I.unit_buying_price,
+				I.case_qty,I.shelf_location,b.actual_qty,I.item_group,I.supplier,I.website_warehouse
 			from 
 				`tabItem Supplier` as c
 				left join `tabItem` as I on I.name=c.parent
 				left join `tabBin` as b on I.name=b.item_code
-				where I.item_group = '{item_group}'
+				where 1 = 1 {conditions}
 				group by I.item_name
 			""",as_dict=1)
-
-# item_list=[{"item_code":"95177MT",'shelf_location':"1234","sote_ore": },{"item_code":"95177MdsdT",'shelf_location':"1234"}]
+			
 @frappe.whitelist()
 def update_ietm_shelf_location(item_list):
 	item_list = json.loads(item_list)
@@ -579,3 +592,17 @@ def get_reorder_qty(item):
 def get_supplier_number(item):
 	return frappe.db.get_value('Item Supplier', {"parent": item,"parenttype": "Item" }, 'supplier_part_no')
 
+@frappe.whitelist()
+def get_supplier_number_and_reorder_details(item):
+	supplier_part_no = frappe.db.get_value('Item Supplier', {"parent": item,"parenttype": "Item" }, 'supplier_part_no')
+	warehouse_reorder_level = frappe.db.get_value('Item Reorder', { "parent": item, "parenttype": "Item" }, 'warehouse_reorder_level')
+	warehouse_reorder_qty = frappe.db.get_value('Item Reorder', { "parent": item, "parenttype": "Item" }, 'warehouse_reorder_qty')
+	return [supplier_part_no, warehouse_reorder_level, warehouse_reorder_qty]
+
+@frappe.whitelist()
+def get_default_password(field):
+	return get_password('Global Defaults','Global Defaults',field)
+	
+@frappe.whitelist()
+def get_sales_order_count():
+	return frappe.db.count("Sales Order",{'custom_status': 'New'})

@@ -3,9 +3,10 @@
     <td><a href="/{{d.route}}"><img
         src="{{ d.website_image or d.image }}" alt="{{ d.name }}"></a></td>
     <td>
-        <div class="font-weight-bold">
+        <div class="font-weight-bold item-name-{{d.item_code}}" >
             {{ d.item_name }}
         </div>
+        <span class="d-none item-uom-{{d.item_code}}">{{ d.stock_uom }}</span>
         <div>
             {{ d.item_code }}
         </div>
@@ -20,16 +21,16 @@
                 placeholder="{{ _('Add notes') }}">{{d.additional_notes or ''}}</textarea>
         </div>
     </td>
-    <td class="text-right"> {{ frappe.db.get_value('Item',d.item_code,'case_qty') }} </td>
+    <td class="text-right"> <span class="case-qty-{{d.item_code}}">{{ frappe.db.get_value('Item',d.item_code,'case_qty') }}</span> </td>
     <td class="text-right">
         <div class="input-group number-spinner">
             <span class="input-group-prepend d-none d-sm-inline-block">
-                <button class="btn btn-outline-secondary cart-btn" data-dir="dwn">–</button>
+                <button class="btn btn-outline-secondary cart-btn btn-{{d.item_code}}" data-dir="dwn">–</button>
             </span>
             <input class="form-control text-right cart-qty border-secondary" name="value" value="{{ d.get_formatted('qty') }}"
                 data-item-code="{{ d.item_code }}">
             <span class="input-group-append d-none d-sm-inline-block">
-                <button class="btn btn-outline-secondary cart-btn" data-dir="up">+</button>
+                <button class="btn btn-outline-secondary cart-btn btn-{{d.item_code}}" data-dir="up">+</button>
             </span>
         </div>
         <!-- button -->
@@ -39,16 +40,18 @@
     </td>
     {% if cart_settings.enable_checkout %}
     <td class="text-right">
-        <div>
+        <div class="total-{{d.item_code}}">
             {{ d.get_formatted('amount') }}
         </div>
-        <span class="text-muted">
+        <span class="text-muted rate-{{d.item_code}}">
             {{ _('Rate:') }} $ {{ frappe.db.get_value('Item',d.item_code,'unit_selling_price') or (d.rate/frappe.db.get_value('Item',d.item_code,'case_qty')) }}
         </span>
     </td>
     {% endif %}
 </tr>
+
 {% endfor %}
+{% block script %}
 <script>
      $(".cart-items .btn-remove").on('click', function () {
         item_code = $(this).attr("data-item-code");
@@ -63,4 +66,80 @@
 			on_error();
 		}
 	}
+   
+    $(".cart-items").on('click', '.number-spinner .btn', function () {
+        if(frappe.session.user=="Guest"){
+            window.location.href = "/login"
+            frappe.throw("Please do login in system to add item into cart")
+        }
+        var btn = $(this),
+        input = btn.closest('.number-spinner').find('input'),
+        oldValue = input.val().trim(),
+        newVal = 0;
+
+        if (btn.attr('data-dir') == 'up') {
+            newVal = parseInt(oldValue) + 1;
+        } else {
+            if (oldValue > 1) {
+                newVal = parseInt(oldValue) - 1;
+            }
+        }
+        
+        input.val(newVal);
+
+        var item_code = input.attr("data-item-code");
+        
+       
+        cost_calculation(newVal, item_code)
+
+        
+        // document.cookie = item_list
+        // console.log(document.cookie)
+        
+        // To add or remove qty from cart by clicking on + an - sign
+        var rate = parseFloat($('.rate-' + item_code).html().replace("Rate: $", '')) * $('.case-qty-' + item_code).html();
+        
+       
+        var amount =  parseFloat($('.total-' + item_code).html().replace("$", ''))
+        var item_name = $('.item-name-' + item_code).html()
+        var uom = $('.item-uom-' + item_code).html()
+       
+        frappe.call({
+            'method': "techievolve.api._update_cart",
+            'args': {
+                'item_code': item_code,
+                'item_name': item_name,
+                'uom': uom,
+                'qty': newVal,
+                'rate': rate,
+                'amount': amount,
+                
+            },
+            callback: function(r){
+                shopping_cart.set_cart_count();
+            }
+        })
+       
+      // shopping_cart.shopping_cart_update({item_code, qty: newVal, cart_dropdown: true});
+        
+      
+        return false;
+    });
+    function cost_calculation(qty, item_code) {
+        // var qty = btn.val();
+        var case_qty = parseFloat($('.case-qty-' + item_code).html());
+        // var rate = parseFloat($('.rate-' + item_code).html().replace(/[^\d\.]/, ''));
+		var rate = parseFloat($('.rate-' + item_code).html().replace("Rate: $", ''));
+        var total = (qty * case_qty * rate).toFixed(2);
+        var currency = "$"
+        
+        var formatted_total = currency + " " +total;
+        $("#grand_total").load(location.href + " #grand_total");
+        $("#grand_total_amount").load(location.href + " #grand_total_amount");
+        $('.total-' + item_code).html(formatted_total)
+        $("#grand_total").load(location.href + " #grand_total");
+        $("#grand_total_amount").load(location.href + " #grand_total_amount");
+
+    }
 </script>
+{% endblock %}
